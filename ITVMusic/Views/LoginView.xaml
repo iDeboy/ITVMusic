@@ -1,0 +1,116 @@
+﻿<Window x:Class="ITVMusic.Views.LoginView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ITVMusic.Views" 
+        xmlns:viewModels="clr-namespace:ITVMusic.ViewModels" 
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp" 
+        xmlns:customcontrols="clr-namespace:ITVMusic.CustomControls"
+        mc:Ignorable="d"
+        Title="LoginView" Height="550" Width="400"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="True"
+        Icon="{DynamicResource Logo}"
+       
+        MouseDown="Window_MouseDown">
+
+    <Window.DataContext>
+        <viewModels:LoginViewModel/>
+    </Window.DataContext>
+
+    <Border CornerRadius="10"
+            Background="{DynamicResource WindowBackground}"
+            BorderBrush="{DynamicResource WindowBorderColor}"
+            BorderThickness="1"
+            Opacity="0.95">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <!-- Control bar -->
+                <RowDefinition Height="25"/>
+
+                <!-- Content -->
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+
+            <!-- Control bar -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <!-- Title Section -->
+                    <ColumnDefinition/>
+
+                    <!-- Minimize Button -->
+                    <ColumnDefinition Width="35"/>
+
+                    <!-- Close Button -->
+                    <ColumnDefinition Width="35"/>
+
+                    <ColumnDefinition Width="5"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Title Section -->
+                <TextBlock Grid.Column="0"
+                           Text="Iniciar sesión"
+                           Foreground="{DynamicResource WindowForeground}"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           FontFamily="Montserrat"
+                           VerticalAlignment="Center"
+                           Margin="10,0"/>
+
+                <!-- Minimize Button -->
+                <Button Grid.Column="1"
+                        Style="{DynamicResource ActionButton}"
+                        Tag="{DynamicResource ActionButtonOverBackground}"
+                        
+                        Click="MinimizeButton_Click">
+                        
+                    <fa:IconImage Icon="WindowMinimize" Style="{DynamicResource ActionButtonIcon}"/>
+                </Button>
+
+                <!-- Close Button -->
+                <Button Grid.Column="2"
+                        Style="{DynamicResource ActionButton}"
+                        Tag="{DynamicResource CloseActionButtonOverBackground}"
+                        
+                        Click="CloseButton_Click">
+
+                    <fa:IconImage Icon="Xmark" Style="{DynamicResource ActionButtonIcon}"/>
+                </Button>
+
+            </Grid>
+            
+            <!-- Content -->
+            <StackPanel Grid.Row="2" 
+                        Width="250"
+                        Orientation="Vertical"
+                        Margin="0,35,0,0">
+
+                <TextBlock Text="ITVMusic"
+                           FontSize="25"
+                           FontWeight="Medium"
+                           FontFamily="Montserrat"
+                           HorizontalAlignment="Center"/>
+
+                <Image Width="130" Height="130"
+                       Source="{DynamicResource Logo}"/>
+
+                <customcontrols:IconTextBox Title="No° Control ó Usuario"
+                                            Icon="User"
+                                            Text=""
+                                            Margin="0,25,0,0"/>
+
+                <customcontrols:BindablePasswordBox Title="Contraseña"
+                                                    Margin="0,35,0,0"/>
+
+            </StackPanel>
+
+        </Grid>
+
+    </Border>
+</Window>
