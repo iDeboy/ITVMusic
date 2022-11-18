@@ -14,7 +14,8 @@
     
     <!-- TextBlock Colors -->
     <SolidColorBrush x:Key="TextBoxTitleColor" Color="Gray"/>
-    
+    <SolidColorBrush x:Key="ErrorMessageColor" Color="#FB539B"/>
+
     <!-- TextBox Colors -->
     <SolidColorBrush x:Key="TextBoxContentColor" Color="Black"/>
     <SolidColorBrush x:Key="TextBoxBorderColor" Color="DarkSlateGray"/>

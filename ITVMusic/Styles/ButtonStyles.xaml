@@ -29,5 +29,27 @@
         </Style.Triggers>
 
     </Style>
+
+    <Style x:Key="RoundedButton" TargetType="{x:Type Button}">
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Width="{TemplateBinding Width}" 
+                            Height="{TemplateBinding Height}"
+                            CornerRadius="20"
+                            
+                            Background="{TemplateBinding Background}">
+
+                        <ContentPresenter VerticalAlignment="Center"
+                                          HorizontalAlignment="Center">
+
+                        </ContentPresenter>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
     
 </ResourceDictionary>

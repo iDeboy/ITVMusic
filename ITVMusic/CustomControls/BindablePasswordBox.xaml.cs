@@ -70,7 +70,15 @@ namespace ITVMusic.CustomControls {
         }
 
         private void ShowPassword(object sender, MouseButtonEventArgs e) {
-            m_ShowPasswordIcon.Icon = IconChar.Eye;
+
+            //m_ShowPasswordIcon.Icon = IconChar.Eye;
+            if (sender is not Button btn) return;
+
+            if (btn.Content is not IconBlock iconBlock) return;
+
+            iconBlock.Icon = IconChar.Eye;
+
+            btn.Content = iconBlock;
 
             m_TextBox.Text = m_PasswordBox.Password;
             m_TextBox.Visibility = Visibility.Visible;
@@ -78,7 +86,16 @@ namespace ITVMusic.CustomControls {
         }
 
         private void HidePassword(object sender, MouseButtonEventArgs e) {
-            m_ShowPasswordIcon.Icon = IconChar.EyeSlash;
+
+            //m_ShowPasswordIcon.Icon = IconChar.EyeSlash;
+
+            if (sender is not Button btn) return;
+
+            if (btn.Content is not IconBlock iconBlock) return;
+
+            iconBlock.Icon = IconChar.EyeSlash;
+
+            btn.Content = iconBlock;
 
             m_PasswordBox.Password = m_TextBox.Text;
             m_PasswordBox.Visibility = Visibility.Visible;
@@ -89,6 +106,5 @@ namespace ITVMusic.CustomControls {
             if (e.Key is Key.Space) e.Handled = true;
         }
 
-       
     }
 }

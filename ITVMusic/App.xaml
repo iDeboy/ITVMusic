@@ -1,7 +1,7 @@
 ﻿<Application x:Class="ITVMusic.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:ITVMusic"
+             xmlns:local="clr-namespace:ITVMusic" 
              Startup="Application_Startup">
 
     <Application.Resources>
@@ -14,6 +14,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilty"/>
+
             <BitmapImage x:Key="Logo" UriSource="/Images/Logo.jpeg" />
             
         </ResourceDictionary>
