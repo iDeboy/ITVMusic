@@ -21,16 +21,8 @@ namespace ITVMusic.CustomControls {
     /// Lógica de interacción para BindablePasswordBox.xaml
     /// </summary>
     public partial class BindablePasswordBox : UserControl {
+        
         // Properties
-        public static readonly DependencyProperty TitleProperty =
-            DependencyProperty.Register(nameof(Title), typeof(string), typeof(BindablePasswordBox));
-
-        public static readonly DependencyProperty TitleColorProperty =
-            DependencyProperty.Register(nameof(TitleColor), typeof(Brush), typeof(BindablePasswordBox));
-
-        public static readonly DependencyProperty IconColorProperty =
-            DependencyProperty.Register(nameof(IconColor), typeof(Brush), typeof(BindablePasswordBox));
-
         public static readonly DependencyProperty PasswordProperty =
             DependencyProperty.Register(nameof(Password), typeof(SecureString), typeof(BindablePasswordBox));
 
@@ -39,25 +31,8 @@ namespace ITVMusic.CustomControls {
             set => SetValue(PasswordProperty, value);
         }
 
-        public string Title {
-            get => (string)GetValue(TitleProperty);
-            set => SetValue(TitleProperty, value);
-        }
-
-        public Brush TitleColor {
-            get => (Brush)GetValue(TitleColorProperty);
-            set => SetValue(TitleColorProperty, value);
-        }
-
-        public Brush IconColor {
-            get => (Brush)GetValue(IconColorProperty);
-            set => SetValue(IconColorProperty, value);
-        }
-
         public BindablePasswordBox() {
             InitializeComponent();
-            SetResourceReference(TitleColorProperty, "TextBoxTitleColor");
-            SetResourceReference(IconColorProperty, "TextBoxIconColor");
         }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e) {
@@ -66,43 +41,9 @@ namespace ITVMusic.CustomControls {
 
         public void Clear() {
             m_PasswordBox.Clear();
-            m_TextBox.Clear();
         }
 
-        private void ShowPassword(object sender, MouseButtonEventArgs e) {
-
-            //m_ShowPasswordIcon.Icon = IconChar.Eye;
-            if (sender is not Button btn) return;
-
-            if (btn.Content is not IconBlock iconBlock) return;
-
-            iconBlock.Icon = IconChar.Eye;
-
-            btn.Content = iconBlock;
-
-            m_TextBox.Text = m_PasswordBox.Password;
-            m_TextBox.Visibility = Visibility.Visible;
-            m_PasswordBox.Visibility = Visibility.Collapsed;
-        }
-
-        private void HidePassword(object sender, MouseButtonEventArgs e) {
-
-            //m_ShowPasswordIcon.Icon = IconChar.EyeSlash;
-
-            if (sender is not Button btn) return;
-
-            if (btn.Content is not IconBlock iconBlock) return;
-
-            iconBlock.Icon = IconChar.EyeSlash;
-
-            btn.Content = iconBlock;
-
-            m_PasswordBox.Password = m_TextBox.Text;
-            m_PasswordBox.Visibility = Visibility.Visible;
-            m_TextBox.Visibility = Visibility.Collapsed;
-        }
-
-        private void PasswordBox_KeyDown(object sender, KeyEventArgs e) {
+        private void PasswordBox_PreviewKeyDown(object sender, KeyEventArgs e) {
             if (e.Key is Key.Space) e.Handled = true;
         }
 

@@ -10,18 +10,14 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ITVMusic.CustomControls {
+namespace ITVMusic.Views {
     /// <summary>
-    /// Lógica de interacción para RoundedButton.xaml
+    /// Lógica de interacción para MainView.xaml
     /// </summary>
-    public partial class RoundedButton : Button {
-
-        public double CornerRadius => Height / 2;
-
-        public RoundedButton() {
+    public partial class MainView : Window {
+        public MainView() {
             InitializeComponent();
         }
     }

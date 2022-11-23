@@ -17,28 +17,25 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace ITVMusic.CustomControls {
     /// <summary>
-    /// Lógica de interacción para IconTextBox.xaml
+    /// Lógica de interacción para IconedTextBox.xaml
     /// </summary>
-    public partial class IconTextBox : UserControl {
+    public partial class IconedTextBox : UserControl {
 
         // Properties
         public static readonly DependencyProperty TitleProperty =
-            DependencyProperty.Register(nameof(Title), typeof(string), typeof(IconTextBox));
+            DependencyProperty.Register(nameof(Title), typeof(string), typeof(IconedTextBox));
 
         public static readonly DependencyProperty IconProperty =
-            DependencyProperty.Register(nameof(Icon), typeof(IconChar), typeof(IconTextBox));
+            DependencyProperty.Register(nameof(Icon), typeof(IconChar), typeof(IconedTextBox));
 
         public static readonly DependencyProperty TextProperty =
-            DependencyProperty.Register(nameof(Text), typeof(string), typeof(IconTextBox));
+            DependencyProperty.Register(nameof(Text), typeof(string), typeof(IconedTextBox));
 
-        public static readonly DependencyProperty TitleColorProperty =
-            DependencyProperty.Register(nameof(TitleColor), typeof(Brush), typeof(IconTextBox));
+        public static readonly DependencyProperty MaxLenghtProperty =
+            DependencyProperty.Register(nameof(MaxLenght), typeof(int), typeof(IconedTextBox));
 
-        public static readonly DependencyProperty IconColorProperty =
-            DependencyProperty.Register(nameof(IconColor), typeof(Brush), typeof(IconTextBox));
-
-        public static readonly DependencyProperty TextColorProperty =
-            DependencyProperty.Register(nameof(TextColor), typeof(Brush), typeof(IconTextBox));
+        public static readonly DependencyProperty CharacterCasingProperty =
+            DependencyProperty.Register(nameof(CharacterCasing), typeof(CharacterCasing), typeof(IconedTextBox));
 
         public string Title {
             get => (string)GetValue(TitleProperty);
@@ -55,14 +52,14 @@ namespace ITVMusic.CustomControls {
             set => SetValue(TextProperty, value);
         }
 
-        public Brush TitleColor {
-            get => (Brush)GetValue(TitleColorProperty);
-            set => SetValue(TitleColorProperty, value);
+        public int MaxLenght {
+            get => (int)GetValue(MaxLenghtProperty);
+            set => SetValue(MaxLenghtProperty, value);
         }
 
-        public Brush IconColor {
-            get => (Brush)GetValue(IconColorProperty);
-            set => SetValue(IconColorProperty, value);
+        public CharacterCasing CharacterCasing {
+            get => (CharacterCasing)GetValue(CharacterCasingProperty);
+            set => SetValue(CharacterCasingProperty, value);
         }
 
         // Events
@@ -72,16 +69,10 @@ namespace ITVMusic.CustomControls {
             TextChanged?.Invoke(this, e);
         }
 
-        public Brush TextColor {
-            get => (Brush)GetValue(TextColorProperty);
-            set => SetValue(TextColorProperty, value);
-        }
-
-        public IconTextBox() {
+        public IconedTextBox() {
             InitializeComponent();
-            SetResourceReference(TitleColorProperty, "TextBoxTitleColor");
-            SetResourceReference(IconColorProperty, "TextBoxIconColor");
-            SetResourceReference(TextColorProperty, "TextBoxContentColor");
+            MaxLenght = int.MaxValue;
+            CharacterCasing = CharacterCasing.Normal;
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e) {

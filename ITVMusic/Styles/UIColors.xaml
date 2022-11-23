@@ -11,10 +11,11 @@
     <SolidColorBrush x:Key="ActionButtonOverForeground" Color="Black"/>
     <SolidColorBrush x:Key="ActionButtonOverBackground" Color="#B0E0E6"/>
     <SolidColorBrush x:Key="CloseActionButtonOverBackground" Color="#F08080"/>
-    
+
     <!-- TextBlock Colors -->
     <SolidColorBrush x:Key="TextBoxTitleColor" Color="Gray"/>
     <SolidColorBrush x:Key="ErrorMessageColor" Color="#FB539B"/>
+    <SolidColorBrush x:Key="SuccedMessageColor" Color="#2ECC71"/>
 
     <!-- TextBox Colors -->
     <SolidColorBrush x:Key="TextBoxContentColor" Color="Black"/>
