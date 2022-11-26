@@ -15,7 +15,7 @@
         Background="Transparent"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="True"
-        Icon="{DynamicResource Logo}"
+        Icon="{DynamicResource LogoJpeg}"
         Visibility="{Binding IsViewVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilty}}"
         
         MouseDown="Window_MouseDown"

@@ -1,0 +1,78 @@
+﻿<UserControl x:Class="ITVMusic.Views.SearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ITVMusic.Views" 
+             xmlns:viewModels="clr-namespace:ITVMusic.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+             mc:Ignorable="d" 
+             Background="{DynamicResource WindowBackground}"
+             d:DesignHeight="453" d:DesignWidth="923">
+
+    <UserControl.DataContext>
+        <viewModels:SearchViewModel x:Name="model"/>
+    </UserControl.DataContext>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Left"
+                Width="400"
+                Height="60"
+                CornerRadius="30"
+                Background="Transparent"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource TextBoxBorderColor}"
+                Margin="50,0,0,0">
+
+            <StackPanel Orientation="Horizontal">
+                <fa:IconImage Grid.Column="0" 
+                              Icon="Search" 
+                              IconFont="Solid"
+                              Height="30"
+                              VerticalAlignment="Center"
+                              Margin="30,0,15,0"/>
+
+                <TextBox FontSize="18"
+                         FontWeight="Medium"
+                         BorderThickness="0"
+                         VerticalAlignment="Center"
+                         Width="320"
+                         
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         materialDesign:HintAssist.Hint="¿Qué quieres buscar?"
+                         materialDesign:HintAssist.Background="Transparent"
+                         materialDesign:TextFieldAssist.HasOutlinedTextField="True"
+                         
+                         TextChanged="TextBox_TextChanged">
+
+                </TextBox>
+            </StackPanel>
+
+        </Border>
+
+        <ListBox Grid.Row="1" 
+                 ItemsSource="{Binding MusicItemsFound}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 BorderThickness="0"
+                 SelectedItem="{Binding SelectedMusicModel}"
+                 ItemContainerStyle="{DynamicResource MusicItemPresenter}">
+
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel IsItemsHost="True" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+
+        </ListBox>
+
+    </Grid>
+</UserControl>

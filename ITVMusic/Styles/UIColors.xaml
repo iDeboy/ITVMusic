@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Window Colors -->
-    <SolidColorBrush x:Key="WindowBackground" Color="White"/>
+    <SolidColorBrush x:Key="WindowBackground" Color="#ECF0F1"/>
     <SolidColorBrush x:Key="WindowForeground" Color="Gray"/>
     <SolidColorBrush x:Key="WindowBorderColor" Color="Black"/>
     
@@ -23,5 +23,10 @@
     
     <!-- Icon Colors -->
     <SolidColorBrush x:Key="TextBoxIconColor" Color="DarkSlateGray"/>
+    
+    <!-- Other -->
+    <SolidColorBrush x:Key="DashboardColor" Color="DarkTurquoise"/>
+    <SolidColorBrush x:Key="MenuButtonForeground" Color="#273746"/>
+    <SolidColorBrush x:Key="CaptionColor" Color="#7B68EE"/>
 
 </ResourceDictionary>

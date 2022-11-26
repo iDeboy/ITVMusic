@@ -4,19 +4,18 @@ using ITVMusic.Util;
 using System;
 using System.Collections.ObjectModel;
 using System.Security;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Text.RegularExpressions;
-using MaterialDesignThemes.Wpf;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace ITVMusic.ViewModels {
     public class RegisterViewModel : ViewModelBase {
 
         // Fields
 
-        private BitmapImage? m_Icon;
+        private ImageSource? m_Icon;
         private string? m_LastNamePat;
         private string? m_LastNameMat;
         private string? m_Phone;
@@ -34,7 +33,7 @@ namespace ITVMusic.ViewModels {
         private bool m_IsRegisterSuccessful;
 
         public ObservableCollection<SuscriptionModel> Suscriptions { get; }
-        public BitmapImage? Icon {
+        public ImageSource? Icon {
             get => m_Icon;
             set {
                 m_Icon = value;
@@ -189,11 +188,11 @@ namespace ITVMusic.ViewModels {
             });
         }
 
-        private static bool ValidarIcon(BitmapImage? image, out string errors) {
-
+        private static bool ValidarIcon(ImageSource? imageSource, out string errors) {
             errors = "";
-            if (image is null || image.ToByteArray().Length is 0) {
-                errors = "Debe de elegir un icono.";
+
+            if (imageSource is not BitmapImage image || image.ToByteArray().Length is 0) {
+                errors = "Debe de elegir un icono válido.";
                 return false;
             }
 

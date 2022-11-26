@@ -25,7 +25,7 @@ namespace ITVMusic.CustomControls {
             DependencyProperty.Register(nameof(Title), typeof(string), typeof(ImagePicker));
 
         public static readonly DependencyProperty SourceProperty =
-            DependencyProperty.Register(nameof(Source), typeof(BitmapImage), typeof(ImagePicker));
+            DependencyProperty.Register(nameof(Source), typeof(ImageSource), typeof(ImagePicker));
 
         public static readonly DependencyProperty UriSourceProperty =
             DependencyProperty.Register(nameof(UriSource), typeof(Uri), typeof(ImagePicker));
@@ -35,8 +35,8 @@ namespace ITVMusic.CustomControls {
             set => SetValue(TitleProperty, value);
         }
 
-        public BitmapImage? Source {
-            get => (BitmapImage)GetValue(SourceProperty);
+        public ImageSource? Source {
+            get => (ImageSource)GetValue(SourceProperty);
             set => SetValue(SourceProperty, value);
         }
 
@@ -63,7 +63,7 @@ namespace ITVMusic.CustomControls {
 
             if (!result) return;
 
-            Source = new(new(dialog.FileName));
+            Source = new BitmapImage(new(dialog.FileName));
 
         }
     }

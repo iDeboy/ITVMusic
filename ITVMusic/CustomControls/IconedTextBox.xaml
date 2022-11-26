@@ -20,6 +20,7 @@
                  CharacterCasing="{Binding CharacterCasing, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:IconedTextBox}}"
                  
                  materialDesign:HintAssist.Foreground="{DynamicResource TextBoxTitleColor}"
+                 materialDesign:HintAssist.Background="Transparent"
                  materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource TextBoxBorderColor}"
                  materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
                  
