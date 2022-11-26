@@ -202,7 +202,7 @@ namespace ITVMusic.ViewModels {
             // esa playlist y si se da clic en alguna canción reproducirla
 
             if (e is PlaylistModel playlist) {
-                CurrentChildView = null; // <- View para las playlist
+                CurrentChildView = new PlaylistViewModel(); // <- View para las playlist
                 Caption = $"{playlist.Title}";
                 Icon = IconChar.Headphones;
                 return;
@@ -212,7 +212,7 @@ namespace ITVMusic.ViewModels {
             // esa playlist y si se da clic en alguna canción reproducirla
 
             if (e is AlbumModel album) {
-                CurrentChildView = null; // <- View para los albums
+                CurrentChildView = new AlbumViewModel(); // <- View para los albums
                 Caption = $"{album.Title}";
                 Icon = IconChar.CompactDisc;
                 return;

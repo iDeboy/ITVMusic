@@ -13,10 +13,15 @@ namespace ITVMusic.Models {
         public ImageSource? Icon { get; set; }
         public string Type => "Canción";
         public string? Title { get; set; }
-        public string Description { get; set; } = string.Empty;
+        public string Description => "De: @Artistas";
         public string[]? Genders { get; set; }
         public byte[]? Bytes { get; set; }
         public Duration Duration { get; set; }
+        public AlbumModel? Album { get; set; }
+        public uint Reproductions { get; set; }
+
+        public string Information => Description;
+
         public Stream GetStream() {
 
             if (Bytes is null) return Stream.Null;

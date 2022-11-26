@@ -27,6 +27,14 @@
         <DataTemplate DataType="{x:Type viewModels:SearchViewModel}">
             <local:SearchView/>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewModels:PlaylistViewModel}">
+            <local:PlaylistView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewModels:AlbumViewModel}">
+            <local:AlbumView/>
+        </DataTemplate>
     </Window.Resources>
 
     <Border CornerRadius="10"

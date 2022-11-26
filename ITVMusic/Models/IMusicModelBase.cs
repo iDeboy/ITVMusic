@@ -13,6 +13,7 @@ namespace ITVMusic.Models {
         public string Type { get; }
         public string? Title { get; }
         public string Description { get; }
+        public string Information { get; }
 
     }
 }

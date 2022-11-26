@@ -43,16 +43,22 @@ namespace ITVMusic.ViewModels {
 
         private void FillMusicItemsTest() {
 
-            for (uint i = 1; i < 4; i++) {
+            var songs = new ObservableCollection<SongModel>();
 
-                MusicItems.Add(new SongModel() {
+            for (uint i = 1; i < 10; i++) {
+
+                var song = new SongModel() {
                     Id = i,
                     Icon = File.ReadAllBytes(@"C:\Users\iDeboy\Pictures\fondo2.jpg").ToImage(),
                     Title = $"Canción {i}",
-                    Description = "Autores: ",
                     Duration = new Duration(new(0, new Random().Next(1, 4), new Random().Next(0, 59))),
+                    Album = new() { Title = $"Álbum {i}" },
+                    Reproductions = (uint)new Random().Next(0, 100)
                     //Bytes = File.ReadAllBytes(@"C:\Users\iDeboy\Downloads\Rolas\BoyWithUke Toxic (Live Performance) .m4a")
-                });
+                };
+
+                MusicItems.Add(song);
+                songs.Add(song);
 
             }
 
@@ -62,7 +68,7 @@ namespace ITVMusic.ViewModels {
                     Id = i,
                     Icon = File.ReadAllBytes(@"C:\Users\iDeboy\Pictures\fondo1.jpg").ToImage(),
                     Title = $"Playlist {i}",
-                    Description = "Creada por ..."
+                    Songs = songs
                 });
 
             }
@@ -73,7 +79,7 @@ namespace ITVMusic.ViewModels {
                     Id = i,
                     Icon = File.ReadAllBytes(@"C:\Users\iDeboy\Pictures\foto_perfil.jpg").ToImage(),
                     Title = $"Álbum {i}",
-                    Description = "Creada por ..."
+                    Songs = songs
                 });
 
             }
