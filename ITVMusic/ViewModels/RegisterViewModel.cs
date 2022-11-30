@@ -9,12 +9,22 @@ using System.Windows.Media.Imaging;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using ITVMusic.Repositories.Bases;
+using ITVMusic.Repositories;
+using System.Windows.Documents;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 
 namespace ITVMusic.ViewModels {
     public class RegisterViewModel : ViewModelBase {
 
-        // Fields
+        // Data
+        private readonly IUserRepository userRepository;
+        private readonly ISuscriptionRepository suscriptionRepository;
 
+
+        // Fields
         private ImageSource? m_Icon;
         private string? m_LastNamePat;
         private string? m_LastNameMat;
@@ -31,6 +41,7 @@ namespace ITVMusic.ViewModels {
         private string? m_ErrorMessage;
         private bool m_IsErrorMessageVisible;
         private bool m_IsRegisterSuccessful;
+
 
         public ObservableCollection<SuscriptionModel> Suscriptions { get; }
         public ImageSource? Icon {
@@ -54,7 +65,7 @@ namespace ITVMusic.ViewModels {
                 OnPropertyChanged();
             }
         }
-        public string? Phone {
+        public string? PhoneNumber {
             get => m_Phone;
             set {
                 m_Phone = value;
@@ -140,6 +151,8 @@ namespace ITVMusic.ViewModels {
             }
         }
 
+        private ObservableCollection<UserModel> AllUsers { get; }
+
         // Commands
         public ICommand CloseCommand { get; }
         public ICommand RegisterCommand { get; }
@@ -147,8 +160,13 @@ namespace ITVMusic.ViewModels {
         public RegisterViewModel() {
 
             Suscriptions = new();
+            AllUsers = new();
 
-            FillSuscriptions();
+            userRepository = new UserRepository();
+            suscriptionRepository = new SuscriptionRepository();
+
+            InitSuscriptions();
+            InitAllUsers();
 
             CloseCommand = new ViewModelCommand(ExecuteCloseCommand, CanExecuteCloseCommand);
             RegisterCommand = new ViewModelCommand(ExecuteRegisterCommand, CanExecuteRegisterCommand);
@@ -162,7 +180,25 @@ namespace ITVMusic.ViewModels {
             return !IsRegisterSuccessful;
         }
 
-        private void FillSuscriptions() {
+        private async void InitSuscriptions() {
+
+            Suscriptions.Clear();
+
+            foreach (var it in await suscriptionRepository.GetByAll()) {
+                Suscriptions.Add(it);
+            }
+
+        }
+        private async void InitAllUsers() {
+
+            AllUsers.Clear();
+
+            foreach (var user in await userRepository.GetByAll()) {
+                AllUsers.Add(user);
+            }
+
+        }
+        private void FillSuscriptionsTest() {
             Suscriptions.Add(new() {
                 Id = 1,
                 PaymentMethod = "Deposito Oxxo",
@@ -191,7 +227,7 @@ namespace ITVMusic.ViewModels {
         private static bool ValidarIcon(ImageSource? imageSource, out string errors) {
             errors = "";
 
-            if (imageSource is not BitmapImage image || image.ToByteArray().Length is 0) {
+            if (imageSource is not BitmapImage image) {
                 errors = "Debe de elegir un icono válido.";
                 return false;
             }
@@ -219,7 +255,7 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private static bool ValidarNoControl(string? noControl, out string errors) {
+        private bool ValidarNoControl(string? noControl, out string errors) {
             errors = "";
 
             // Validar si el campo está vacio
@@ -245,10 +281,14 @@ namespace ITVMusic.ViewModels {
             }
 
             // Validar si no existe
+            if (AllUsers.Any(u => u.NoControl == noControl)) {
+                errors = "No. Control ya está registrado.";
+                return false;
+            }
 
             return true;
         }
-        private static bool ValidarNickname(string? nickname, out string errors) {
+        private bool ValidarNickname(string? nickname, out string errors) {
             errors = "";
 
             // Validar si el campo está vacio
@@ -263,6 +303,10 @@ namespace ITVMusic.ViewModels {
             }
 
             // Validar si no existe
+            if (AllUsers.Any(u => u.Nickname == nickname)) {
+                errors = "Nickname ya está registrado.";
+                return false;
+            }
 
             return true;
         }
@@ -327,16 +371,11 @@ namespace ITVMusic.ViewModels {
             errors = "";
 
             if (string.IsNullOrWhiteSpace(phone)) {
-                errors = "Debe ingresar su número de télefono.";
-                return false;
+                //errors = "Debe ingresar su número de télefono.";
+                return true;
             }
 
             if (!Regex.IsMatch(phone, @"\d{10}")) {
-                errors = "Número de télefono no válido.";
-                return false;
-            }
-
-            if (phone.Length != 10) {
                 errors = "Número de télefono no válido.";
                 return false;
             }
@@ -354,7 +393,7 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private static bool ValidarCorreo(string? email, out string errors) {
+        private bool ValidarCorreo(string? email, out string errors) {
 
             errors = "";
 
@@ -369,6 +408,10 @@ namespace ITVMusic.ViewModels {
             }
 
             // Validar de que ya no este registrada
+            if (AllUsers.Any(u => u.Email == email)) {
+                errors = "Correo ya está registrado.";
+                return false;
+            }
 
             return true;
         }
@@ -406,10 +449,10 @@ namespace ITVMusic.ViewModels {
 
         private async void ExecuteRegisterCommand(object? obj) {
 
-            if (IsErrorMessageVisible = !ValidarIcon(Icon, out string iconErrors)) {
+            /*if (IsErrorMessageVisible = !ValidarIcon(Icon, out string iconErrors)) {
                 ErrorMessage = iconErrors;
                 return;
-            }
+            }*/
 
             if (IsErrorMessageVisible = !ValidarFechaNacimiento(Birthday, out string birthdayErrors)) {
                 ErrorMessage = birthdayErrors;
@@ -436,7 +479,7 @@ namespace ITVMusic.ViewModels {
                 return;
             }
 
-            if (IsErrorMessageVisible = !ValidarTelefono(Phone, out string phoneErrors)) {
+            if (IsErrorMessageVisible = !ValidarTelefono(PhoneNumber, out string phoneErrors)) {
                 ErrorMessage = phoneErrors;
                 return;
             }
@@ -461,7 +504,19 @@ namespace ITVMusic.ViewModels {
                 return;
             }
 
-            IsRegisterSuccessful = true;
+            IsRegisterSuccessful = await userRepository.Add(new() { 
+                Icon = Icon,
+                Birthday = Birthday!.Value,
+                NoControl = NoControl,
+                Nickname = Nickname,
+                Name = Name,
+                LastNamePat = LastNamePat,
+                LastNameMat = LastNameMat,
+                Gender = Gender,
+                Email = Email,
+                Password = new NetworkCredential(null, Password).Password,
+                SuscriptionId = Suscription!.Id,
+            });
 
             await Task.Delay(2000);
 
@@ -473,6 +528,6 @@ namespace ITVMusic.ViewModels {
             IsViewVisible = false;
         }
 
-        
+
     }
 }

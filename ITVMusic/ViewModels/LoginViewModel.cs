@@ -1,4 +1,6 @@
-﻿using ITVMusic.Views;
+﻿using ITVMusic.Repositories;
+using ITVMusic.Repositories.Bases;
+using ITVMusic.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,8 @@ using System.Windows;
 using System.Windows.Input;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
-namespace ITVMusic.ViewModels {
+namespace ITVMusic.ViewModels
+{
     public class LoginViewModel : ViewModelBase {
 
         // Fields
@@ -20,6 +23,10 @@ namespace ITVMusic.ViewModels {
         private string? m_ErrorMessage;
         private bool m_IsErrorMessageVisible;
         private bool m_IsUserSuscriptionExpired;
+
+        // Data
+        private readonly IUserRepository userRepository;
+        private readonly ISuscriptionRepository suscriptionRepository;
 
         public string? Username {
             get => m_Username;
@@ -67,6 +74,9 @@ namespace ITVMusic.ViewModels {
             IsErrorMessageVisible = false;
             IsUserSuscriptionExpired = false;
 
+            userRepository = new UserRepository();
+            suscriptionRepository = new SuscriptionRepository();
+
             CloseCommand = new ViewModelCommand(ExecuteCloseCommand);
             LoginCommand = new ViewModelCommand(ExecuteLoginCommand);
             GoToRegisterCommand = new ViewModelCommand(ExecuteGoToRegisterCommand);
@@ -92,7 +102,7 @@ namespace ITVMusic.ViewModels {
             }
 
             // Si no es un número de control
-            if (!Regex.IsMatch(username, @"\[A-z]\d{8}")) {
+            if (!Regex.IsMatch(username, @"[A-z]\d{8}")) {
 
                 if (username.Length > 15) {
                     errors = "Nickname muy largo.";
@@ -125,7 +135,7 @@ namespace ITVMusic.ViewModels {
             return true;
         }
 
-        private void ExecuteLoginCommand(object? obj) {
+        private async void ExecuteLoginCommand(object? obj) {
 
             IsUserSuscriptionExpired = false;
 
@@ -142,8 +152,7 @@ namespace ITVMusic.ViewModels {
             }
 
             // Validar usuario
-            bool isValidUser = false; // <- Cambiar por consulta a la base de datos
-            bool isExpired = true;
+            bool isValidUser = await userRepository.AutenticateUser(new(Username, Password)); // <- Cambiar por consulta a la base de datos
 
             // Hacer con excepciones
             // Si la suscripcion ya no es valida, mostrar el mensaje de renovarla
@@ -152,12 +161,16 @@ namespace ITVMusic.ViewModels {
                 return;
             }
 
+            var user = await userRepository.GetByNoControlOrUsername(Username);
+
+            bool isExpired = await suscriptionRepository.AutenticateUserSuscription(user);
+
             if (IsErrorMessageVisible = IsUserSuscriptionExpired = isExpired) {
                 ErrorMessage = "Suscripción expirada.";
                 return;
             }
 
-            // NextWindow = new MainView();
+            NextWindow = new MainView();
             ExecuteCloseCommand(obj);
         }
     }

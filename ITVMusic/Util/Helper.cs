@@ -14,8 +14,11 @@ using System.Windows.Media.Imaging;
 namespace ITVMusic.Util {
     public static class Helper {
 
-        public static byte[] ToByteArray(this BitmapImage image) {
-            return File.ReadAllBytes(image.UriSource.LocalPath);
+        public static async Task<byte[]?> ToByteArray(this ImageSource image) {
+
+            if (image is not BitmapImage bitmapImage) return null;
+
+            return await File.ReadAllBytesAsync(bitmapImage.UriSource.LocalPath);
         }
 
         public static bool IsFuture(this DateOnly date) {
@@ -30,19 +33,14 @@ namespace ITVMusic.Util {
             return DateOnly.FromDateTime(dateTime);
         }
 
-        public static Stream ToStream(this byte[] bytes) {
-            return new MemoryStream(bytes);
+        public static ImageSource? ToImage(this object? obj) {
+
+            if (obj is null || obj is DBNull) return null;
+
+            return new ImageSourceConverter().ConvertFrom(obj) as BitmapImage;
         }
 
-        public static ImageSource? ToImage(this byte[] bytes) {
-            return new ImageSourceConverter().ConvertFrom(bytes) as ImageSource;
-        }
-
-        public static void Save(this byte[] bytes, string path) {
-            File.WriteAllBytes(path, bytes);
-        }
-
-        public static Task SaveAsync(this byte[] bytes, string path) {
+        public static Task Save(this byte[] bytes, string path) {
             return File.WriteAllBytesAsync(path, bytes);
         }
 

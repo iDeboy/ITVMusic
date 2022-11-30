@@ -48,16 +48,15 @@ namespace ITVMusic {
 
         private void Application_Startup(object sender, StartupEventArgs e) {
 
-            //var login = new LoginView();
-            //login.Show();
-            //
-            //Current.MainWindow = login;
+            var login = new LoginView();
+            login.Show();
 
+            Current.MainWindow = login;
 
-            var main = new MainView();
-            main.Show();
+            //var main = new MainView();
+            //main.Show();
 
-            Current.MainWindow = main;
+            //Current.MainWindow = main;
         }
 
         private void Application_Exit(object sender, ExitEventArgs e) {
