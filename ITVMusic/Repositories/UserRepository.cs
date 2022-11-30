@@ -39,12 +39,12 @@ namespace ITVMusic.Repositories {
                 command.Parameters.Add("@apellidoPat", MySqlDbType.VarChar).Value = user.LastNamePat;
                 command.Parameters.Add("@apellidoMat", MySqlDbType.VarChar).Value = user.LastNameMat;
                 command.Parameters.Add("@nickname", MySqlDbType.VarChar).Value = user.Nickname;
-                command.Parameters.Add("@genero", MySqlDbType.Enum).Value = user.Gender?.First();
+                command.Parameters.Add("@genero", MySqlDbType.Enum).Value = user.Gender!.First();
                 command.Parameters.Add("@correo", MySqlDbType.VarChar).Value = user.Email;
                 command.Parameters.Add("@fechaNacimiento", MySqlDbType.Date).Value = user.Birthday;
                 command.Parameters.Add("@telefono", MySqlDbType.UInt32).Value = string.IsNullOrWhiteSpace(user.PhoneNumber) ? null : user.PhoneNumber;
                 command.Parameters.Add("@contraseña", MySqlDbType.VarChar).Value = user.Password;
-                command.Parameters.Add("@icono", MySqlDbType.MediumBlob).Value = user.Icon?.ToByteArray();
+                command.Parameters.Add("@icono", MySqlDbType.MediumBlob).Value = await user.Icon?.ToByteArray()!;
                 command.Parameters.Add("@suscripcionId", MySqlDbType.Byte).Value = user.SuscriptionId;
            
                 await command.ExecuteNonQueryAsync();

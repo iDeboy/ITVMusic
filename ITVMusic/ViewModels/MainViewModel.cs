@@ -26,7 +26,7 @@ namespace ITVMusic.ViewModels {
         private ViewModelBase? m_CurrentChildView;
         private string? m_Caption;
         private IconChar m_Icon;
-        private UserAccountModel m_UserAccount;
+        private UserAccountModel? m_UserAccount;
         private bool m_IsCurrentSong;
         private double m_Volume;
         private SongModel? m_CurrentSong;
@@ -54,7 +54,7 @@ namespace ITVMusic.ViewModels {
                 OnPropertyChanged();
             }
         }
-        public UserAccountModel UserAccount {
+        public UserAccountModel? UserAccount {
             get => m_UserAccount;
             set {
                 m_UserAccount = value;
@@ -128,8 +128,6 @@ namespace ITVMusic.ViewModels {
             Volume = 0;
             IconPlayer = IconChar.PlayCircle;
 
-            m_UserAccount = new();
-
             CloseCommand = new ViewModelCommand(ExecuteCloseCommand);
             HomeCommand = new ViewModelCommand(ExecuteHomeCommand);
             SearchCommand = new ViewModelCommand(ExecuteSearchCommand);
@@ -141,10 +139,13 @@ namespace ITVMusic.ViewModels {
 
             ExecuteHomeCommand(null);
 
-            UserAccountTest();
-
+            //UserAccountTest();
+            InitUserAccount();
         }
 
+        private void InitUserAccount() {
+            UserAccount = new(App.UserData);
+        }
         private void ExecutePausePlayCommand(object? obj) {
 
             if (CurrentSong is null) {
@@ -222,10 +223,11 @@ namespace ITVMusic.ViewModels {
 
         private void UserAccountTest() {
 
-            UserAccount = new() {
+            UserAccount = new(userData: null) {
                 Icon = new BitmapImage(new Uri(@"C:\Users\iDeboy\Pictures\Suprime.png")),
                 Nickname = "iDeboy"
             };
+
         }
 
         private void ExecuteShowPlaylistsCommand(object? obj) {

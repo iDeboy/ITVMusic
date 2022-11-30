@@ -163,19 +163,19 @@
                                                       Margin="0,25,0,0"/>
 
                         <ComboBox FontSize="16"
-                              FontWeight="Medium" 
-                              IsEditable="False"
-                              
-                              materialDesign:HintAssist.Foreground="{DynamicResource TextBoxTitleColor}"
-                              materialDesign:TextFieldAssist.HasClearButton="True"
-                              materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource TextBoxBorderColor}"
-                              
-                              materialDesign:ColorZoneAssist.Mode="Standard"
-                              
-                              SelectedItem="{Binding Gender, Mode=OneWayToSource}"
-                              
-                              Style="{StaticResource MaterialDesignFloatingHintComboBox}"
-                              Margin="0,25,0,0">
+                                  FontWeight="Medium" 
+                                  IsEditable="False"
+                                  
+                                  materialDesign:HintAssist.Foreground="{DynamicResource TextBoxTitleColor}"
+                                  materialDesign:TextFieldAssist.HasClearButton="True"
+                                  materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource TextBoxBorderColor}"
+                                  
+                                  materialDesign:ColorZoneAssist.Mode="Standard"
+                                  ItemsSource="{Binding Genders}"
+                                  SelectedItem="{Binding Gender, Mode=OneWayToSource}"
+                                  
+                                  Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                                  Margin="0,25,0,0">
 
                             <materialDesign:HintAssist.Hint>
                                 <StackPanel Orientation="Horizontal"
@@ -193,10 +193,6 @@
 
                                 </StackPanel>
                             </materialDesign:HintAssist.Hint>
-
-                            <ComboBoxItem Content="Masculino" />
-                            <ComboBoxItem Content="Femenino" />
-                            <ComboBoxItem Content="Indefinido" />
 
                         </ComboBox>
 

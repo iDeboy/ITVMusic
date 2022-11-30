@@ -19,6 +19,8 @@ namespace ITVMusic {
 
         public static string UtilFolder => Path.Combine(Environment.CurrentDirectory, "util");
 
+        public static UserModel? UserData { get; set; }
+
         private static IMusicModelBase? m_SelectedMusicModel;
         private static SongModel? m_CurrentSong;
         public static IMusicModelBase? SelectedMusicModel {

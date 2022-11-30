@@ -161,14 +161,16 @@ namespace ITVMusic.ViewModels
                 return;
             }
 
-            var user = await userRepository.GetByNoControlOrUsername(Username);
+            var userData = await userRepository.GetByNoControlOrUsername(Username);
 
-            bool isExpired = await suscriptionRepository.AutenticateUserSuscription(user);
+            bool isExpired = await suscriptionRepository.AutenticateUserSuscription(userData);
 
             if (IsErrorMessageVisible = IsUserSuscriptionExpired = isExpired) {
                 ErrorMessage = "Suscripción expirada.";
                 return;
             }
+
+            App.UserData = userData;
 
             NextWindow = new MainView();
             ExecuteCloseCommand(obj);

@@ -15,6 +15,7 @@ using System.Windows.Documents;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Windows;
 
 namespace ITVMusic.ViewModels {
     public class RegisterViewModel : ViewModelBase {
@@ -44,6 +45,7 @@ namespace ITVMusic.ViewModels {
 
 
         public ObservableCollection<SuscriptionModel> Suscriptions { get; }
+        public ObservableCollection<string> Genders { get; }
         public ImageSource? Icon {
             get => m_Icon;
             set {
@@ -160,12 +162,14 @@ namespace ITVMusic.ViewModels {
         public RegisterViewModel() {
 
             Suscriptions = new();
+            Genders = new();
             AllUsers = new();
 
             userRepository = new UserRepository();
             suscriptionRepository = new SuscriptionRepository();
 
             InitSuscriptions();
+            InitGenders();
             InitAllUsers();
 
             CloseCommand = new ViewModelCommand(ExecuteCloseCommand, CanExecuteCloseCommand);
@@ -187,6 +191,16 @@ namespace ITVMusic.ViewModels {
             foreach (var it in await suscriptionRepository.GetByAll()) {
                 Suscriptions.Add(it);
             }
+
+        }
+
+        private void InitGenders() {
+
+            Genders.Clear();
+
+            Genders.Add("Masculino");
+            Genders.Add("Femenino");
+            Genders.Add("Indefinido");
 
         }
         private async void InitAllUsers() {
@@ -504,7 +518,7 @@ namespace ITVMusic.ViewModels {
                 return;
             }
 
-            IsRegisterSuccessful = await userRepository.Add(new() { 
+            IsRegisterSuccessful = await userRepository.Add(new() {
                 Icon = Icon,
                 Birthday = Birthday!.Value,
                 NoControl = NoControl,

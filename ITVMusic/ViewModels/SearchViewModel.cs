@@ -49,7 +49,7 @@ namespace ITVMusic.ViewModels {
 
                 var song = new SongModel() {
                     Id = i,
-                    Icon = File.ReadAllBytes(@"C:\Users\iDeboy\Pictures\fondo2.jpg").ToImage(),
+                    //Icon = File.ReadAllBytes(@"C:\Users\iDeboy\Pictures\fondo2.jpg").ToImage(),
                     Title = $"Canción {i}",
                     Duration = new Duration(new(0, new Random().Next(1, 4), new Random().Next(0, 59))),
                     Album = new() { Title = $"Álbum {i}" },
@@ -59,14 +59,13 @@ namespace ITVMusic.ViewModels {
 
                 MusicItems.Add(song);
                 songs.Add(song);
-
             }
 
             for (uint i = 1; i < 5; i++) {
 
                 MusicItems.Add(new PlaylistModel() {
                     Id = i,
-                    Icon = File.ReadAllBytes(@"C:\Users\iDeboy\Pictures\fondo1.jpg").ToImage(),
+                    //Icon = File.ReadAllBytes(@"C:\Users\iDeboy\Pictures\fondo1.jpg").ToImage(),
                     Title = $"Playlist {i}",
                     Songs = songs
                 });
@@ -77,7 +76,7 @@ namespace ITVMusic.ViewModels {
 
                 MusicItems.Add(new AlbumModel() {
                     Id = i,
-                    Icon = File.ReadAllBytes(@"C:\Users\iDeboy\Pictures\foto_perfil.jpg").ToImage(),
+                    //Icon = File.ReadAllBytes(@"C:\Users\iDeboy\Pictures\foto_perfil.jpg").ToImage(),
                     Title = $"Álbum {i}",
                     Songs = songs
                 });

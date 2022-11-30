@@ -19,9 +19,7 @@ namespace ITVMusic.Models {
         public Duration Duration { get; set; }
         public AlbumModel? Album { get; set; }
         public uint Reproductions { get; set; }
-
         public string Information => Description;
-
         public Stream GetStream() {
 
             if (Bytes is null) return Stream.Null;
