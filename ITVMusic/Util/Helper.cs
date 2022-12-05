@@ -4,9 +4,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -14,7 +16,7 @@ using System.Windows.Media.Imaging;
 namespace ITVMusic.Util {
     public static class Helper {
 
-        public static async Task<byte[]?> ToByteArray(this ImageSource image) {
+        public static async Task<byte[]?> ToByteArray(this ImageSource? image) {
 
             if (image is not BitmapImage bitmapImage) return null;
 
@@ -25,6 +27,20 @@ namespace ITVMusic.Util {
             return date > DateTime.Today.ToDateOnly();
         }
 
+        public static bool IsValid(this DateOnly date) {
+
+            bool result = !date.IsFuture();
+
+            int year = date.Year;
+            int currentYear = DateTime.Today.Year;
+
+            int old = currentYear - year;
+
+            result &= old > 16;
+
+            return result;
+        }
+
         public static bool IsDefault(this DateOnly date) {
             return date == DateOnly.MinValue;
         }
@@ -33,11 +49,26 @@ namespace ITVMusic.Util {
             return DateOnly.FromDateTime(dateTime);
         }
 
+        public static Duration ToDuration(this DateTime dateTime) {
+            var timeOnly = TimeOnly.FromDateTime(dateTime);
+
+            return new(timeOnly.ToTimeSpan());
+        }
+
+        public static TimeOnly ToTimeOnly(this Duration duration) {
+
+            if (!duration.HasTimeSpan) return TimeOnly.MinValue;
+
+            return TimeOnly.FromTimeSpan(duration.TimeSpan);
+        }
+
         public static ImageSource? ToImage(this object? obj) {
 
             if (obj is null || obj is DBNull) return null;
 
-            return new ImageSourceConverter().ConvertFrom(obj) as BitmapImage;
+            if (obj is not byte[] bytes) return null;
+
+            return new ImageSourceConverter().ConvertFrom(bytes) as ImageSource;
         }
 
         public static Task Save(this byte[] bytes, string path) {

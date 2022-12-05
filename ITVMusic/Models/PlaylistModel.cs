@@ -1,23 +1,38 @@
-﻿using System;
+﻿using ITVMusic.Util;
+using MySqlConnector;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
 namespace ITVMusic.Models {
-    public class PlaylistModel : IMusicModelBase {
+    public class PlaylistModel : ModelBase, IMusicModelBase {
+
+        public PlaylistModel() { }
+        public PlaylistModel(MySqlDataReader reader) {
+            Id = Convert.ToUInt32(reader["Playlist_Codigo"]);
+            Creationdate = Convert.ToDateTime(reader["Playlist_FechaCreacion"]);
+            Title = Convert.ToString(reader["Playlist_Titulo"]);
+            Icon = reader["Playlist_Icono"].ToImage();
+        }
+
         public uint Id { get; set; }
-        public ImageSource? Icon { get; set; }
-        public string Type => "Playlist";
-        public string? Title { get; set; }
-        public string Description => "De @Creadores";
         public DateTime Creationdate { get; set; }
-        public ObservableCollection<SongModel> Songs { get; set; } = new();
+        public string? Title { get; set; }
+        public ImageSource? Icon { get; set; }
+
+        public string Type => "Playlist";
+        public ObservableCollection<AlmacenModel> Songs { get; set; } = new();
+        public ObservableCollection<UserModel> Authors { get; set; } = new();
+        public string Description => $"De {string.Join(", ", AuthorsName)}";
         private string SongCountString => Songs.Count == 1 ? "canción" : "canciones";
-        public string Information => $"@Creadores - {Songs.Count} {SongCountString}, {SumSongsDuration()}";
+        public string Information => $"{string.Join(", ", AuthorsName)} - {Songs.Count} {SongCountString}, {SumSongsDuration()}";
+        public string[] AuthorsName => GetAuthorsName();
         private string SumSongsDuration() {
 
             string result = "";
@@ -44,6 +59,17 @@ namespace ITVMusic.Models {
             result += $"{aux.TimeSpan.Seconds} s";
 
             return result;
+        }
+        private string[] GetAuthorsName() {
+
+            List<string> names = new();
+
+            if (Authors is null) return names.ToArray();
+
+            names = new(from author in Authors
+                        select author.Name);
+
+            return names.ToArray();
         }
     }
 }

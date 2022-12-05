@@ -14,6 +14,7 @@ namespace ITVMusic.Repositories.Bases {
 
             ConnectionString = new MySqlConnectionStringBuilder() {
                 Server = "192.168.0.152",
+                //Server = "172.20.10.12",
                 Database = "ITVMusic",
                 UserID = "App",
                 Password = "hono2002",

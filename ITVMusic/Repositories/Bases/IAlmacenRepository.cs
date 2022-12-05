@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ITVMusic.Repositories.Bases {
-    public interface ISuscriptionRepository : IRepository<SuscriptionModel> {
+    public interface IAlmacenRepository : IRepository<AlmacenModel> {
 
-        Task<bool> AutenticateUserSuscription(UserModel? user);
+
 
     }
 }

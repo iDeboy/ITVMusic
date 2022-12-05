@@ -1,18 +1,27 @@
 ﻿using ITVMusic.Models;
 using ITVMusic.Repositories.Bases;
 using ITVMusic.Util;
+using Microsoft.VisualBasic.ApplicationServices;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ITVMusic.Repositories {
     public class UserRepository : RepositoryBase, IUserRepository {
+
+        private readonly IPlaylistRepository playlistRepository;
+        private readonly IAlmacenRepository almacenRepository;
+
+        public UserRepository() {
+            playlistRepository = new PlaylistRepository();
+            almacenRepository = new AlmacenRepository();
+        }
+
         public async Task<bool> Add(UserModel? user) {
 
             if (user is null) return false;
@@ -44,14 +53,15 @@ namespace ITVMusic.Repositories {
                 command.Parameters.Add("@fechaNacimiento", MySqlDbType.Date).Value = user.Birthday;
                 command.Parameters.Add("@telefono", MySqlDbType.UInt32).Value = string.IsNullOrWhiteSpace(user.PhoneNumber) ? null : user.PhoneNumber;
                 command.Parameters.Add("@contraseña", MySqlDbType.VarChar).Value = user.Password;
-                command.Parameters.Add("@icono", MySqlDbType.MediumBlob).Value = await user.Icon?.ToByteArray()!;
+                command.Parameters.Add("@icono", MySqlDbType.MediumBlob).Value = await user.Icon.ToByteArray();
                 command.Parameters.Add("@suscripcionId", MySqlDbType.Byte).Value = user.SuscriptionId;
-           
-                await command.ExecuteNonQueryAsync();
+
+                command.ExecuteNonQuery();
             }
 
             return true;
         }
+
         public async Task<bool> AutenticateUser(NetworkCredential credential) {
 
             bool validUser = false;
@@ -63,6 +73,7 @@ namespace ITVMusic.Repositories {
                 using var command = new MySqlCommand();
 
                 await connection.OpenAsync();
+
                 command.Connection = connection;
 
                 if (isNoControl) {
@@ -75,7 +86,7 @@ namespace ITVMusic.Repositories {
                 command.Parameters.Add("@username", MySqlDbType.VarChar).Value = credential.UserName;
                 command.Parameters.Add("@password", MySqlDbType.VarChar).Value = credential.Password;
 
-                validUser = await command.ExecuteScalarAsync() != null;
+                validUser = command.ExecuteScalar() != null;
             }
 
             return validUser;
@@ -94,28 +105,76 @@ namespace ITVMusic.Repositories {
                 using var command = new MySqlCommand();
 
                 await connection.OpenAsync();
+
                 command.Connection = connection;
+
                 command.CommandText = "Select * From Usuario";
 
-                using var reader = await command.ExecuteReaderAsync();
+                using var reader = command.ExecuteReader();
 
-                while (await reader.ReadAsync()) {
+                while (reader.Read()) {
 
-                    allUsers.Add(new() {
-                        NoControl = (string)reader["Usuario_NoControl"],
-                        SuscriptionId = (byte)reader["Suscripcion_CodigoSuscripcion"],
-                        Icon = reader["Usuario_Icono"].ToImage(),
-                        Name = (string)reader["Usuario_Nombre"],
-                        LastNamePat = (string)reader["Usuario_ApellidoPaterno"],
-                        LastNameMat = (string)reader["Usuario_ApellidoMaterno"],
-                        Nickname = (string)reader["Usuario_Nickname"],
-                        Gender = (string)reader["Usuario_Genero"],
-                        Email = (string)reader["Usuario_Correo"],
-                        Birthday = ((DateTime)reader["Usuario_FechaNacimiento"]).ToDateOnly(),
-                        PhoneNumber = reader["Usuario_Telefono"].ToString(),
-                        Password = string.Empty,
-                        ContratationDate = (DateTime)reader["Usuario_FechaContratacion"],
-                    });
+                    var user = new UserModel(reader);
+
+                    // Obtener las playlists del usuario
+
+                    var playlists = new List<Task<PlaylistModel?>>();
+
+                    using (var commandPlaylist = new MySqlCommand()) {
+
+                        commandPlaylist.Connection = connection;
+
+                        commandPlaylist.CommandText = "Select Playlist_Codigo From Crea Where Usuario_NoControl = @noControl";
+                        commandPlaylist.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = user.NoControl;
+
+                        using var crea = commandPlaylist.ExecuteReader();
+
+                        while (crea.Read()) {
+
+                            var playlistId = Convert.ToUInt32(crea["Playlist_Codigo"]);
+
+                            playlists.Add(playlistRepository.GetById(playlistId));
+
+                        }
+                    }
+
+                    // Obtener las canciones que ha escuchado el usuario
+
+                    var songs = new List<Task<AlmacenModel?>>();
+
+                    using (var commandSong = new MySqlCommand()) {
+
+                        commandSong.Connection = connection;
+
+                        commandSong.CommandText = "Select Almacena_Codigo From Escucha Where Usuario_NoControl = @noControl";
+                        commandSong.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = user.NoControl;
+
+                        using var escucha = commandSong.ExecuteReader();
+
+                        while (escucha.Read()) {
+
+                            var almacenId = Convert.ToUInt32(escucha["Almacena_Codigo"]);
+
+                            songs.Add(almacenRepository.GetById(almacenId));
+
+                        }
+                    }
+
+                    await Task.WhenAll(songs);
+
+                    foreach (var song in songs) {
+                        if (song.Result is not null) user.Songs.Add(song.Result);
+                    }
+
+                    await Task.WhenAll(playlists);
+
+                    foreach (var playlist in playlists) {
+
+                        if (playlist.Result is not null) user.Playlists.Add(playlist.Result);
+
+                    }
+
+                    allUsers.Add(user);
 
                 }
 
@@ -124,98 +183,82 @@ namespace ITVMusic.Repositories {
             return allUsers;
         }
 
-        public async Task<UserModel?> GetByNoControl(string? noControl) {
+        public async Task<UserModel?> GetById(object? noControl) {
 
-            UserModel? user = null;
+            if (noControl is not string userNoControl) return null;
 
-            noControl = noControl?.ToUpper();
+            userNoControl = userNoControl.ToUpper();
 
-            using (var connection = GetConnection()) {
+            var all = await GetByAll();
 
-                using var command = new MySqlCommand();
-
-                await connection.OpenAsync();
-                command.Connection = connection;
-
-                command.CommandText = "Select * From Usuario Where Usuario_NoControl = @noControl";
-                command.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = noControl;
-
-                using var reader = await command.ExecuteReaderAsync();
-
-                if (await reader.ReadAsync()) {
-                    user = new UserModel() {
-                        NoControl = (string)reader["Usuario_NoControl"],
-                        SuscriptionId = (byte)reader["Suscripcion_CodigoSuscripcion"],
-                        Icon = reader["Usuario_Icono"].ToImage(),
-                        Name = (string)reader["Usuario_Nombre"],
-                        LastNamePat = (string)reader["Usuario_ApellidoPaterno"],
-                        LastNameMat = (string)reader["Usuario_ApellidoMaterno"],
-                        Nickname = (string)reader["Usuario_Nickname"],
-                        Gender = (string)reader["Usuario_Genero"],
-                        Email = (string)reader["Usuario_Correo"],
-                        Birthday = ((DateTime)reader["Usuario_FechaNacimiento"]).ToDateOnly(),
-                        PhoneNumber = reader["Usuario_Telefono"].ToString(),
-                        Password = string.Empty,
-                        ContratationDate = (DateTime)reader["Usuario_FechaContratacion"],
-                    };
-                }
-
-
-            }
-
-            return user;
+            return (from it in all
+                    where it.NoControl == userNoControl
+                    select it).FirstOrDefault();
         }
 
         public async Task<UserModel?> GetByNoControlOrUsername(string? key) {
 
             if (key is null) return null;
 
-            if (Regex.IsMatch(key, @"[A-z]\d{8}")) return await GetByNoControl(key);
+            if (Regex.IsMatch(key, @"[A-z]\d{8}")) return await GetById(key);
 
             return await GetByUsername(key);
         }
 
         public async Task<UserModel?> GetByUsername(string? username) {
 
-            UserModel? user = null;
+            if (username is null) return null;
+
+            var all = await GetByAll();
+
+            return (from it in all
+                    where it.Nickname == username
+                    select it).FirstOrDefault();
+
+        }
+
+        public async Task<bool> ListenToSong(UserModel? user, AlmacenModel? song) {
+
+            if (user is null) return false;
+
+            if (song is null) return false;
+
+            if (song.Song is null || song.Album is null) return false;
+
+            var allUsers = GetByAll();
+            var allAlmacenes = almacenRepository.GetByAll();
+
+            await Task.WhenAll(allUsers, allAlmacenes);
+
+            // Comprobar que el usuario este en la base de datos
+            if (!allUsers.Result.Any(u => u.NoControl == user.NoControl)) return false;
+
+            // Comprobar que ese almacen exista
+            if (!allAlmacenes.Result.Any(al => al.Id == song.Id)) return false;
 
             using (var connection = GetConnection()) {
 
                 using var command = new MySqlCommand();
 
                 await connection.OpenAsync();
+
                 command.Connection = connection;
 
-                command.CommandText = "Select * From Usuario Where Usuario_Nickname = @username";
-                command.Parameters.Add("@username", MySqlDbType.VarChar).Value = username;
+                command.CommandText = "Insert Into Escucha (Usuario_NoControl, Almacena_Codigo)\n";
+                command.CommandText += "Values(@noControl, @almacenId);";
 
-                using var reader = await command.ExecuteReaderAsync();
+                command.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = user.NoControl;
+                command.Parameters.Add("@almacenId", MySqlDbType.UInt32).Value = song.Id;
 
-                if (await reader.ReadAsync()) {
-                    user = new UserModel() {
-                        NoControl = (string)reader["Usuario_NoControl"],
-                        SuscriptionId = (ushort)reader["Suscripcion_CodigoSuscripcion"],
-                        Icon = reader["Usuario_Icono"].ToImage(),
-                        Name = (string)reader["Usuario_Nombre"],
-                        LastNamePat = (string)reader["Usuario_ApellidoPaterno"],
-                        LastNameMat = (string)reader["Usuario_ApellidoMaterno"],
-                        Nickname = (string)reader["Usuario_Nickname"],
-                        Gender = (string)reader["Usuario_Genero"],
-                        Email = (string)reader["Usuario_Correo"],
-                        Birthday = ((DateTime)reader["Usuario_FechaNacimiento"]).ToDateOnly(),
-                        PhoneNumber = reader["Usuario_Telefono"].ToString(),
-                        Password = string.Empty,
-                        ContratationDate = (DateTime)reader["Usuario_FechaContratacion"],
-                    };
-                }
-
+                command.ExecuteNonQuery();
             }
 
-            return user;
+            return true;
         }
 
-        public Task<bool> Remove(string? noControl) {
+        public Task<bool> RemoveById(object? noControl) {
             throw new NotImplementedException();
         }
+
     }
 }

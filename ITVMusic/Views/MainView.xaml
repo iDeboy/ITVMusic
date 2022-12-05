@@ -116,7 +116,7 @@
 
                     <RadioButton Command="{Binding CreatePlaylistCommand}"
                                  Style="{DynamicResource MenuButton}"
-                                 Visibility="Collapsed">
+                                 Visibility="Visible">
 
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="PlusSquare" 

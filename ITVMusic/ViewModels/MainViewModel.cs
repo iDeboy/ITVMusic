@@ -125,7 +125,7 @@ namespace ITVMusic.ViewModels {
 
             App.SelectedMusicModelChanged += App_SelectedMusicModelChanged;
 
-            Volume = 0;
+            Volume = 0.1;
             IconPlayer = IconChar.PlayCircle;
 
             CloseCommand = new ViewModelCommand(ExecuteCloseCommand);

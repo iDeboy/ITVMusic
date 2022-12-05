@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Windows;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ITVMusic.ViewModels {
     public class RegisterViewModel : ViewModelBase {
@@ -238,7 +239,7 @@ namespace ITVMusic.ViewModels {
             });
         }
 
-        private static bool ValidarIcon(ImageSource? imageSource, out string errors) {
+        private static bool ValidarIcon([NotNullWhen(true)] ImageSource? imageSource, out string errors) {
             errors = "";
 
             if (imageSource is not BitmapImage image) {
@@ -253,7 +254,7 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private static bool ValidarFechaNacimiento(DateOnly? birthday, out string errors) {
+        private static bool ValidarFechaNacimiento([NotNullWhen(true)] DateOnly? birthday, out string errors) {
 
             errors = "";
 
@@ -262,14 +263,14 @@ namespace ITVMusic.ViewModels {
                 return false;
             }
 
-            if (birthday.Value.IsFuture()) {
+            if (!birthday.Value.IsValid()) {
                 errors = "Fecha de nacimiento no válida.";
                 return false;
             }
 
             return true;
         }
-        private bool ValidarNoControl(string? noControl, out string errors) {
+        private bool ValidarNoControl([NotNullWhen(true)] string? noControl, out string errors) {
             errors = "";
 
             // Validar si el campo está vacio
@@ -302,7 +303,7 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private bool ValidarNickname(string? nickname, out string errors) {
+        private bool ValidarNickname([NotNullWhen(true)] string? nickname, out string errors) {
             errors = "";
 
             // Validar si el campo está vacio
@@ -324,7 +325,7 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private static bool ValidarNombre(string? nombre, out string errors) {
+        private static bool ValidarNombre([NotNullWhen(true)] string? nombre, out string errors) {
 
             errors = "";
 
@@ -345,7 +346,7 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private static bool ValidarApellidos(string? apellidoPat, string? apellidoMat, out string errors) {
+        private static bool ValidarApellidos([NotNullWhen(true)] string? apellidoPat, string? apellidoMat, out string errors) {
 
             errors = "";
 
@@ -380,23 +381,23 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private static bool ValidarTelefono(string? phone, out string errors) {
+        private static bool ValidarTelefono([NotNullWhen(true)] string? phoneNumber, out string errors) {
 
             errors = "";
 
-            if (string.IsNullOrWhiteSpace(phone)) {
+            if (string.IsNullOrWhiteSpace(phoneNumber)) {
                 //errors = "Debe ingresar su número de télefono.";
                 return true;
             }
 
-            if (!Regex.IsMatch(phone, @"\d{10}")) {
+            if (!Regex.IsMatch(phoneNumber, @"\d{10}")) {
                 errors = "Número de télefono no válido.";
                 return false;
             }
 
             return true;
         }
-        private static bool ValidarGenero(string? gender, out string errors) {
+        private static bool ValidarGenero([NotNullWhen(true)] string? gender, out string errors) {
 
             errors = "";
 
@@ -407,7 +408,7 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private bool ValidarCorreo(string? email, out string errors) {
+        private bool ValidarCorreo([NotNullWhen(true)] string? email, out string errors) {
 
             errors = "";
 
@@ -429,7 +430,7 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private static bool ValidarPassword(SecureString? password, out string errors) {
+        private static bool ValidarPassword([NotNullWhen(true)] SecureString? password, out string errors) {
 
             errors = "";
             if (password is null || password.Length is 0) {
@@ -449,7 +450,7 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private static bool ValidarSuscripcion(SuscriptionModel? suscription, out string errors) {
+        private static bool ValidarSuscripcion([NotNullWhen(true)] SuscriptionModel? suscription, out string errors) {
 
             errors = "";
 

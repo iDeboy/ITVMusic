@@ -10,10 +10,10 @@ namespace ITVMusic.Models {
 
         public uint Id { get; }
         public ImageSource? Icon { get; }
-        public string Type { get; }
+        public string? Type { get; }
         public string? Title { get; }
-        public string Description { get; }
-        public string Information { get; }
+        public string? Description { get; }
+        public string? Information { get; }
 
     }
 }
