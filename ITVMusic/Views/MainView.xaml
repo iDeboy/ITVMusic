@@ -364,7 +364,7 @@
                                        FontWeight="Bold"
                                        Foreground="{StaticResource WindowForeground}"/>
 
-                            <TextBlock Text="@Artista" 
+                            <TextBlock Text="{Binding CurrentSong.Information}" 
                                        FontSize="18"
                                        FontWeight="Medium"
                                        Foreground="{StaticResource WindowForeground}"
@@ -440,7 +440,7 @@
                                 Grid.Column="1"
                                 x:Name="m_Slider"
                                 x:FieldModifier="private"
-                                Maximum="{Binding CurrentSong.Duration.TimeSpan.Ticks}"
+                                Maximum="{Binding CurrentSong.Song.Duration.TimeSpan.Ticks}"
                                 Minimum="0"
                                 TickFrequency="1"
                                 Foreground="#5B2C6F"
@@ -450,7 +450,7 @@
 
                         <TextBlock Grid.Row="1"  
                                    Grid.Column="2" 
-                                   Text="{Binding CurrentSong.Duration, Converter={StaticResource DurationToMinutesSeg}}"
+                                   Text="{Binding CurrentSong.Song.Duration, Converter={StaticResource DurationToMinutesSeg}}"
                                    FontSize="16"
                                    FontWeight="Medium"
                                    VerticalAlignment="Center"

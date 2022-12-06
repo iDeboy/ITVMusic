@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 namespace ITVMusic.ViewModels {
     public class PlaylistViewModel : ViewModelBase {
 
-        private SongModel? m_SelectedSong;
+        private AlmacenModel? m_SelectedSong;
 
         public PlaylistModel? Playlist => App.SelectedMusicModel as PlaylistModel;
 
-        public SongModel? SelectedSong {
+        public AlmacenModel? SelectedSong {
             get => m_SelectedSong;
             set {
                 m_SelectedSong = value;

@@ -1,27 +1,39 @@
 ﻿using ITVMusic.Models;
 using ITVMusic.Repositories.Bases;
+using MaterialDesignThemes.Wpf.Transitions;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using System.DirectoryServices;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using System.Windows;
 
 namespace ITVMusic.Repositories {
     public class AlmacenRepository : RepositoryBase, IAlmacenRepository {
 
-        private readonly ISongRepository songRepository;
-        private readonly IAlbumRepository albumRepository;
-
-        public AlmacenRepository() {
-
-            albumRepository = new AlbumRepository();
-            songRepository = new SongRepository();
+        // private readonly ISongRepository songRepository;
+        // private readonly IAlbumRepository albumRepository;
+        /*
+        public AlmacenRepository()
+            : this(App.SongRepository, App.AlbumRepository) {
 
         }
 
+        public AlmacenRepository(ISongRepository songRepository)
+            : this(songRepository, new AlbumRepository()) {
+
+        }
+        public AlmacenRepository(IAlbumRepository albumRepository)
+            : this(new SongRepository(), albumRepository) {
+
+        }
+
+        public AlmacenRepository(ISongRepository songRepository, IAlbumRepository albumRepository) {
+            this.songRepository = songRepository;
+            this.albumRepository = albumRepository;
+        }
+        */
         public async Task<bool> Add(AlmacenModel? almacen) {
 
             if (almacen is null) return false;
@@ -30,8 +42,8 @@ namespace ITVMusic.Repositories {
 
             var all = GetByAll();
 
-            var allAlbums = albumRepository.GetByAll();
-            var allSongs = songRepository.GetByAll();
+            var allAlbums = App.AlbumRepository.GetByAll();
+            var allSongs = App.SongRepository.GetByAll();
 
             await Task.WhenAll(all, allSongs, allAlbums);
 
@@ -66,9 +78,49 @@ namespace ITVMusic.Repositories {
             throw new NotImplementedException();
         }
 
+        public Task<AlbumModel?> GetAlbum(AlmacenModel? almacen) {
+
+            //if (almacen is null) return null;
+
+            throw new NotImplementedException();
+            //return await App.AlbumRepository.GetById(almacen.AlbumId);
+        }
+
         public async Task<IEnumerable<AlmacenModel>> GetByAll() {
 
             List<AlmacenModel> allAlmacenes = new();
+
+            using (var connection = GetConnection()) {
+
+                await connection.OpenAsync();
+
+                using var command = new MySqlCommand();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select Al.Fecha, Al.Almacena_Codigo, Ca.*, A.*, C.CantidadEscuchada\n";
+                command.CommandText += "From Almacena As Al\n";
+                command.CommandText += "Left join Canciones As C on Al.Almacena_Codigo = C.Almacena_Codigo\n";
+                command.CommandText += "Inner join Cancion As Ca on Al.Cancion_Codigo = Ca.Cancion_Codigo\n";
+                command.CommandText += "Inner join Album As A on Al.Album_Codigo = A.Album_Codigo;";
+
+                using var reader = await command.ExecuteReaderAsync();
+
+                while (await reader.ReadAsync()) {
+                    allAlmacenes.Add(new AlmacenModel(reader));
+                }
+
+            }
+
+            return allAlmacenes;
+
+        }
+
+        public async Task<AlmacenModel?> GetById(object? id) {
+
+            if (id is not uint almacenId) return null;
+
+            AlmacenModel? almacen = null;
 
             using (var connection = GetConnection()) {
 
@@ -78,69 +130,65 @@ namespace ITVMusic.Repositories {
 
                 command.Connection = connection;
 
-                command.CommandText = "Select * From Almacena";
+                command.CommandText = "Select Al.Fecha, Al.Almacena_Codigo, Ca.*, A.*, C.CantidadEscuchada\n";
+                command.CommandText += "From Almacena As Al\n";
+                command.CommandText += "Left join Canciones As C on Al.Almacena_Codigo = C.Almacena_Codigo\n";
+                command.CommandText += "Inner join Cancion As Ca on Al.Cancion_Codigo = Ca.Cancion_Codigo\n";
+                command.CommandText += "Inner join Album As A on Al.Album_Codigo = A.Album_Codigo\n";
+                command.CommandText += "Where Al.Almacena_Codigo = @almacenId;";
 
-                using var reader = command.ExecuteReader();
+                command.Parameters.Add("@almacenId", MySqlDbType.UInt32).Value = almacenId;
 
-                while (reader.Read()) {
+                using var reader = await command.ExecuteReaderAsync();
 
-                    var albumId = Convert.ToUInt32(reader["Album_Codigo"]);
-                    var cancionId = Convert.ToUInt32(reader["Cancion_Codigo"]);
+                if (await reader.ReadAsync()) {
 
-                    var almacen = new AlmacenModel(reader);
-
-                    // Obtener las reproducciones
-                    using (var commandCanciones = new MySqlCommand()) {
-
-                        commandCanciones.Connection = connection;
-                        commandCanciones.CommandText = "Select CantidadEscuchada From Canciones Where Almacena_Codigo = @almacenId";
-
-                        commandCanciones.Parameters.Add("@almacenId", MySqlDbType.Int32).Value = almacen.Id;
-
-                        using var canciones = commandCanciones.ExecuteReader();
-
-                        if (canciones.Read()) {
-                            almacen.Reproductions = Convert.ToUInt32(canciones["CantidadEscuchada"]);
-                        }
-
-                    }
-
-                    // Obtener el album
-                    var album = albumRepository.GetById(albumId);
-
-                    // Obtener la cancion
-                    var song = songRepository.GetById(cancionId);
-
-                    await Task.WhenAll(album, song);
-
-                    if (album.Result is null || song.Result is null) continue;
-
-                    almacen.Album = album.Result;
-                    almacen.Song = song.Result;
-
-                    allAlmacenes.Add(almacen);
+                    almacen = new AlmacenModel(reader);
 
                 }
 
             }
 
-            return allAlmacenes;
-
+            return almacen;
         }
 
-        public async Task<AlmacenModel?> GetById(object id) {
+        public async Task<uint> GetReproductions(AlmacenModel? almacen) {
 
-            if (id is not uint almacenId) return null;
+            if (almacen is null) return 0;
 
-            var all = await GetByAll();
+            uint repros = 0;
 
-            return (from it in all
-                    where it.Id == almacenId
-                    select it).FirstOrDefault();
+            using (var connection = GetConnection()) {
 
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select CantidadEscuchada From Canciones Where Almacena_Codigo = @almacenId;";
+
+                command.Parameters.Add("@almacenId", MySqlDbType.Int32).Value = almacen.Id;
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read()) {
+                    repros = Convert.ToUInt32(reader["CantidadEscuchada"]);
+                }
+
+            }
+
+            return repros;
         }
 
-        public Task<bool> RemoveById(object id) {
+        public Task<SongModel?> GetSong(AlmacenModel? almacen) {
+
+            //if (almacen is null) return null;
+            throw new NotImplementedException();
+            //return await App.SongRepository.GetById(almacen.SongId);
+        }
+
+        public Task<bool> RemoveById(object? id) {
             throw new NotImplementedException();
         }
     }

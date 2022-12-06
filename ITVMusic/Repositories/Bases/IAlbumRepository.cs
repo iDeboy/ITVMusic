@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace ITVMusic.Repositories.Bases {
     public interface IAlbumRepository : IRepository<AlbumModel> {
-        
+
+        Task<IEnumerable<AlmacenModel>?> GetSongs(AlbumModel? album);
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using MySqlConnector;
+﻿using ITVMusic.Util;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,10 @@ namespace ITVMusic.Models {
             Id = Convert.ToUInt32(reader["Almacena_Codigo"]);
             Date = Convert.ToDateTime(reader["Fecha"]);
 
+            Reproductions = reader["CantidadEscuchada"].ToUInt32();
+
+            Song = new SongModel(reader);
+            Album = new AlbumModel(reader);
         }
 
         public uint Id { get; set; }
@@ -30,8 +35,8 @@ namespace ITVMusic.Models {
 
         public string? Title => Song?.Title;
 
-        public string? Description => Song?.Description;
+        public string? Description => $"{Song?.Description} - {Album?.Title}";
 
-        public string? Information => Song?.Information;
+        public string? Information => Description;
     }
 }

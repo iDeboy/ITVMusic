@@ -17,10 +17,12 @@ namespace ITVMusic.Models {
         public SongModel(MySqlDataReader reader)
             : base(reader) {
 
+            //var table = reader.GetSchemaTable();
+
             Id = Convert.ToUInt32(reader["Cancion_Codigo"]);
             Title = Convert.ToString(reader["Cancion_Titulo"]);
             Genders = Convert.ToString(reader["Cancion_Genero"])?.Split(",", StringSplitOptions.TrimEntries);
-            Duration = Convert.ToDateTime(reader["Cancion_Duracion"]).ToDuration();
+            Duration = (TimeSpan)reader["Cancion_Duracion"];
             Bytes = (byte[])reader["Cancion_Bytes"];
             Icon = reader["Cancion_Icono"].ToImage();
 
@@ -33,11 +35,13 @@ namespace ITVMusic.Models {
         public Duration Duration { get; set; }
         public ImageSource? Icon { get; set; }
 
-        public ObservableCollection<ArtistModel> Artists { get; set; } = new();
+        public ObservableCollection<ArtistModel> Artists { get; } = new();
 
         public string Type => "Canción";
-        public string Description => "De: @Artistas";
+        public string Description => "";//$"De {string.Join(", ", ArtistsNames)}";
         public string Information => Description;
+
+        public string[] ArtistsNames => GetArtistsNames();
 
         public Stream GetStream() {
 
@@ -45,6 +49,17 @@ namespace ITVMusic.Models {
 
             return new MemoryStream(Bytes);
 
+        }
+        private string[] GetArtistsNames() {
+
+
+            List<string> names = new();
+
+            names.AddRange(from artist in Artists
+                           where artist.Name is not null
+                           select artist.Name);
+
+            return names.ToArray();
         }
     }
 }

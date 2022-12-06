@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace ITVMusic.ViewModels {
     public class AlbumViewModel : ViewModelBase {
 
-        private SongModel? m_SelectedSong;
+        private AlmacenModel? m_SelectedSong;
         public AlbumModel? Album => App.SelectedMusicModel as AlbumModel;
-        public SongModel? SelectedSong {
+        public AlmacenModel? SelectedSong {
             get => m_SelectedSong;
             set {
                 m_SelectedSong = value;

@@ -1,7 +1,6 @@
 ﻿using ITVMusic.Models;
 using ITVMusic.Repositories.Bases;
 using ITVMusic.Util;
-using Microsoft.VisualBasic.ApplicationServices;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
@@ -14,14 +13,29 @@ using System.Threading.Tasks;
 namespace ITVMusic.Repositories {
     public class UserRepository : RepositoryBase, IUserRepository {
 
-        private readonly IPlaylistRepository playlistRepository;
-        private readonly IAlmacenRepository almacenRepository;
+        //private readonly IPlaylistRepository playlistRepository;
+        //private readonly IAlmacenRepository almacenRepository;
 
-        public UserRepository() {
-            playlistRepository = new PlaylistRepository();
-            almacenRepository = new AlmacenRepository();
+        /*
+        public UserRepository()
+            : this(App.PlaylistRepository, App.AlmacenRepository) {
+
         }
 
+        public UserRepository(IPlaylistRepository playlistRepository)
+            : this(playlistRepository, new AlmacenRepository()) {
+
+        }
+        public UserRepository(IAlmacenRepository almacenRepository)
+            : this(new PlaylistRepository(), almacenRepository) {
+
+        }
+
+        public UserRepository(IPlaylistRepository playlistRepository, IAlmacenRepository almacenRepository) {
+            this.playlistRepository = playlistRepository;
+            this.almacenRepository = almacenRepository;
+        }
+        */
         public async Task<bool> Add(UserModel? user) {
 
             if (user is null) return false;
@@ -77,10 +91,10 @@ namespace ITVMusic.Repositories {
                 command.Connection = connection;
 
                 if (isNoControl) {
-                    command.CommandText = "Select * From Usuario Where Usuario_NoControl = @username And Usuario_Contraseña = @password";
+                    command.CommandText = "Select * From Usuario Where Usuario_NoControl = @username And Usuario_Contraseña = @password;";
                     credential.UserName = credential.UserName.ToUpper();
                 } else {
-                    command.CommandText = "Select * From Usuario Where Usuario_Nickname = @username And Usuario_Contraseña = @password";
+                    command.CommandText = "Select * From Usuario Where Usuario_Nickname = @username And Usuario_Contraseña = @password;";
                 }
 
                 command.Parameters.Add("@username", MySqlDbType.VarChar).Value = credential.UserName;
@@ -108,74 +122,12 @@ namespace ITVMusic.Repositories {
 
                 command.Connection = connection;
 
-                command.CommandText = "Select * From Usuario";
+                command.CommandText = "Select * From Usuario;";
 
                 using var reader = command.ExecuteReader();
 
                 while (reader.Read()) {
-
-                    var user = new UserModel(reader);
-
-                    // Obtener las playlists del usuario
-
-                    var playlists = new List<Task<PlaylistModel?>>();
-
-                    using (var commandPlaylist = new MySqlCommand()) {
-
-                        commandPlaylist.Connection = connection;
-
-                        commandPlaylist.CommandText = "Select Playlist_Codigo From Crea Where Usuario_NoControl = @noControl";
-                        commandPlaylist.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = user.NoControl;
-
-                        using var crea = commandPlaylist.ExecuteReader();
-
-                        while (crea.Read()) {
-
-                            var playlistId = Convert.ToUInt32(crea["Playlist_Codigo"]);
-
-                            playlists.Add(playlistRepository.GetById(playlistId));
-
-                        }
-                    }
-
-                    // Obtener las canciones que ha escuchado el usuario
-
-                    var songs = new List<Task<AlmacenModel?>>();
-
-                    using (var commandSong = new MySqlCommand()) {
-
-                        commandSong.Connection = connection;
-
-                        commandSong.CommandText = "Select Almacena_Codigo From Escucha Where Usuario_NoControl = @noControl";
-                        commandSong.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = user.NoControl;
-
-                        using var escucha = commandSong.ExecuteReader();
-
-                        while (escucha.Read()) {
-
-                            var almacenId = Convert.ToUInt32(escucha["Almacena_Codigo"]);
-
-                            songs.Add(almacenRepository.GetById(almacenId));
-
-                        }
-                    }
-
-                    await Task.WhenAll(songs);
-
-                    foreach (var song in songs) {
-                        if (song.Result is not null) user.Songs.Add(song.Result);
-                    }
-
-                    await Task.WhenAll(playlists);
-
-                    foreach (var playlist in playlists) {
-
-                        if (playlist.Result is not null) user.Playlists.Add(playlist.Result);
-
-                    }
-
-                    allUsers.Add(user);
-
+                    allUsers.Add(new UserModel(reader));
                 }
 
             }
@@ -189,11 +141,29 @@ namespace ITVMusic.Repositories {
 
             userNoControl = userNoControl.ToUpper();
 
-            var all = await GetByAll();
+            UserModel? user = null;
 
-            return (from it in all
-                    where it.NoControl == userNoControl
-                    select it).FirstOrDefault();
+            using (var connection = GetConnection()) {
+
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select * From Usuario Where Usuario_NoControl = @noControl;";
+
+                command.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = userNoControl;
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read()) {
+                    user = new UserModel(reader);
+                }
+
+            }
+
+            return user;
         }
 
         public async Task<UserModel?> GetByNoControlOrUsername(string? key) {
@@ -209,11 +179,111 @@ namespace ITVMusic.Repositories {
 
             if (username is null) return null;
 
-            var all = await GetByAll();
+            UserModel? user = null;
 
-            return (from it in all
-                    where it.Nickname == username
-                    select it).FirstOrDefault();
+            using (var connection = GetConnection()) {
+
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select * From Usuario Where Usuario_Nickname = @nickname;";
+
+                command.Parameters.Add("@nickname", MySqlDbType.VarChar).Value = username;
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read()) {
+                    user = new UserModel(reader);
+                }
+
+            }
+
+            return user;
+
+        }
+
+        public async Task<IEnumerable<AlmacenModel>?> GetListenedSongs(UserModel? user) {
+
+            if (user is null) return null;
+
+            var songs = new List<AlmacenModel>();
+
+            var tasks = new List<Task<AlmacenModel?>>();
+
+            using (var connection = GetConnection()) {
+
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select Almacena_Codigo From Escucha Where Usuario_NoControl = @noControl;";
+                command.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = user.NoControl;
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read()) {
+
+                    var almacenId = Convert.ToUInt32(reader["Almacena_Codigo"]);
+
+                    tasks.Add(App.AlmacenRepository.GetById(almacenId));
+
+                }
+
+                await Task.WhenAll(tasks);
+
+                songs.AddRange(from task in tasks
+                               where task.Result is not null
+                               select task.Result);
+            }
+
+            return songs;
+        }
+
+        public async Task<IEnumerable<PlaylistModel>?> GetPlaylists(UserModel? user) {
+
+            if (user is null) return null;
+
+            var playlists = new List<PlaylistModel>();
+
+            var playlistTasks = new List<Task<PlaylistModel?>>();
+
+            using (var connection = GetConnection()) {
+
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select Playlist_Codigo From Crea Where Usuario_NoControl = @noControl;";
+                command.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = user.NoControl;
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read()) {
+
+                    var playlistId = Convert.ToUInt32(reader["Playlist_Codigo"]);
+
+                    playlistTasks.Add(App.PlaylistRepository.GetById(playlistId));
+
+                }
+
+                await Task.WhenAll(playlistTasks);
+
+                foreach (var task in playlistTasks) {
+
+                    if (task.Result is not null) playlists.Add(task.Result);
+
+                }
+
+            }
+
+            return playlists;
 
         }
 
@@ -226,7 +296,7 @@ namespace ITVMusic.Repositories {
             if (song.Song is null || song.Album is null) return false;
 
             var allUsers = GetByAll();
-            var allAlmacenes = almacenRepository.GetByAll();
+            var allAlmacenes = App.AlmacenRepository.GetByAll();
 
             await Task.WhenAll(allUsers, allAlmacenes);
 

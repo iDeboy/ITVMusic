@@ -11,5 +11,7 @@ namespace ITVMusic.Repositories.Bases {
         Task<bool> AttatchAuthor(UserModel? user, PlaylistModel? playlist);
         Task<bool> AttatchSong(AlmacenModel? song, PlaylistModel? playlist);
 
+        Task<IEnumerable<UserModel>?> GetUsers(PlaylistModel? playlist);
+        Task<IEnumerable<AlmacenModel>?> GetSongs(PlaylistModel? playlist);
     }
 }

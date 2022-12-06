@@ -47,7 +47,7 @@ namespace ITVMusic.Models {
         public string? Password { get; set; }
         public DateTime ContratationDate { get; set; }
 
-        public ObservableCollection<PlaylistModel> Playlists { get; set; } = new();
-        public ObservableCollection<AlmacenModel> Songs { get; set; } = new();
+        public ObservableCollection<PlaylistModel> Playlists { get; } = new();
+        public ObservableCollection<AlmacenModel> Songs { get; } = new();
     }
 }

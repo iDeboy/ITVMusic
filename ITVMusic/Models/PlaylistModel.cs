@@ -26,12 +26,13 @@ namespace ITVMusic.Models {
         public string? Title { get; set; }
         public ImageSource? Icon { get; set; }
 
+        public ObservableCollection<AlmacenModel> Songs { get; } = new();
+        public ObservableCollection<UserModel> Authors { get; } = new();
+
         public string Type => "Playlist";
-        public ObservableCollection<AlmacenModel> Songs { get; set; } = new();
-        public ObservableCollection<UserModel> Authors { get; set; } = new();
         public string Description => $"De {string.Join(", ", AuthorsName)}";
         private string SongCountString => Songs.Count == 1 ? "canción" : "canciones";
-        public string Information => $"{string.Join(", ", AuthorsName)} - {Songs.Count} {SongCountString}, {SumSongsDuration()}";
+        public string Information => $"De {string.Join(", ", AuthorsName)} - {Songs.Count} {SongCountString}, {SumSongsDuration()}";
         public string[] AuthorsName => GetAuthorsName();
         private string SumSongsDuration() {
 
@@ -39,7 +40,7 @@ namespace ITVMusic.Models {
             Duration aux = new(TimeSpan.Zero);
 
             foreach (var song in Songs) {
-                aux += song.Duration;
+                if (song.Song is not null) aux += song.Song.Duration;
             }
 
             if (aux.TimeSpan.Hours > 0) {

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,6 +14,21 @@ using System.Windows.Media.Imaging;
 
 namespace ITVMusic.Util {
     public static class Helper {
+
+        public static void AddRange<T>(this Collection<T> self, IEnumerable<T?>? collection) {
+
+            if (collection is null) return;
+
+            foreach (var it in collection) {
+
+                if (it is not null) self.Add(it);
+            }
+
+        }
+
+        public static Task AddRangeAsync<T>(this Collection<T> self, IEnumerable<T?>? collection) {
+            return Task.Run(() => self.AddRange(collection));
+        }
 
         public static async Task<byte[]?> ToByteArray(this ImageSource? image) {
 
@@ -69,6 +83,13 @@ namespace ITVMusic.Util {
             if (obj is not byte[] bytes) return null;
 
             return new ImageSourceConverter().ConvertFrom(bytes) as ImageSource;
+        }
+
+        public static uint ToUInt32(this object? obj) {
+
+            if (obj is null || obj is DBNull) return 0;
+
+            return Convert.ToUInt32(obj);
         }
 
         public static Task Save(this byte[] bytes, string path) {

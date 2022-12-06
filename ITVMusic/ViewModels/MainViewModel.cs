@@ -1,18 +1,9 @@
 ﻿using FontAwesome.Sharp;
 using ITVMusic.Models;
-using ITVMusic.Util;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Media;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
@@ -29,7 +20,7 @@ namespace ITVMusic.ViewModels {
         private UserAccountModel? m_UserAccount;
         private bool m_IsCurrentSong;
         private double m_Volume;
-        private SongModel? m_CurrentSong;
+        private AlmacenModel? m_CurrentSong;
         private Duration m_CurrentSongPosition;
         private IconChar m_IconPlayer;
 
@@ -75,7 +66,7 @@ namespace ITVMusic.ViewModels {
                 OnPropertyChanged();
             }
         }
-        public SongModel? CurrentSong {
+        public AlmacenModel? CurrentSong {
             get => m_CurrentSong;
             set {
                 m_CurrentSong = value;
@@ -167,8 +158,10 @@ namespace ITVMusic.ViewModels {
 
             if (CurrentSong is null) return;
 
-            if (CurrentSongPosition >= CurrentSong.Duration) {
-                CurrentSongPosition = CurrentSong.Duration;
+            if (CurrentSong.Song is null) return;
+
+            if (CurrentSongPosition >= CurrentSong.Song.Duration) {
+                CurrentSongPosition = CurrentSong.Song.Duration;
                 IconPlayer = IconChar.PlayCircle;
                 return;
             }
@@ -184,18 +177,22 @@ namespace ITVMusic.ViewModels {
             // Si es una canción no mostrar ninguna vista y reproducir la canción y 
             // mostrarla en el panel inferior
 
-            if (e is SongModel song) {
+            if (e is AlmacenModel song) {
 
                 // Hacer un insert a Escucha
 
                 IconPlayer = IconChar.PlayCircle;
+
                 timer.Stop();
+
                 CurrentSong = song;
 
                 await Task.Delay(500);
 
                 IconPlayer = IconChar.PauseCircle;
+
                 timer.Start();
+
                 return;
             }
 

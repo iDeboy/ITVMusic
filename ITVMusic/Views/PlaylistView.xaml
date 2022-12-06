@@ -84,7 +84,7 @@
                                     Binding="{Binding Album.Title}"/>
                 
                 <DataGridTextColumn Header="Duración" 
-                                    Binding="{Binding Duration, Converter={StaticResource DurationToMinutesSeg}}"/>
+                                    Binding="{Binding Song.Duration, Converter={StaticResource DurationToMinutesSeg}}"/>
             </DataGrid.Columns>
 
         </DataGrid>

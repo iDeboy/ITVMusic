@@ -1,21 +1,25 @@
 ﻿using ITVMusic.Models;
 using ITVMusic.Repositories.Bases;
-using Microsoft.VisualBasic.ApplicationServices;
+using ITVMusic.Util;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ITVMusic.Repositories {
     public class ArtistRepository : RepositoryBase, IArtistRepository {
 
-        private readonly ISongRepository songRepository;
-        public ArtistRepository() {
-            songRepository = new SongRepository();
-        }
+        // private readonly ISongRepository songRepository;
 
+        /*
+        public ArtistRepository()
+            : this(App.SongRepository) { }
+
+        public ArtistRepository(ISongRepository songRepository) {
+            this.songRepository = songRepository;
+        }
+        */
         public async Task<bool> Add(ArtistModel? artist) {
 
             if (artist is null) return false;
@@ -55,64 +59,100 @@ namespace ITVMusic.Repositories {
                 await connection.OpenAsync();
 
                 command.Connection = connection;
-                command.CommandText = "Select * From Artista";
+                command.CommandText = "Select * From Artista;";
 
                 using var reader = command.ExecuteReader();
 
+                while (reader.Read()) {
+                    allArtists.Add(new ArtistModel(reader));
+                }
+
+            }
+
+            // Obtener canciones que canta
+            /*
+            foreach (var artist in allArtists) {
+
+                var songs = await GetSongs(artist);
+
+                artist.Songs.AddRange(songs);
+            }
+            */
+            return allArtists;
+        }
+
+        public async Task<ArtistModel?> GetById(object? id) {
+
+            if (id is not uint artistId) return null;
+
+            ArtistModel? artist = null;
+
+            using (var connection = GetConnection()) {
+
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select * From Artista Where Artista_Codigo = @artistId;";
+
+                command.Parameters.Add("@artistId", MySqlDbType.UInt32).Value = artistId;
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read()) {
+                    artist = new ArtistModel(reader);
+                }
+
+            }
+
+            return artist;
+        }
+
+        public async Task<IEnumerable<SongModel>?> GetSongs(ArtistModel? artist) {
+
+            if (artist is null) return null;
+
+            List<SongModel> songs = new();
+            List<Task<SongModel?>> songTasks = new();
+
+            using (var connection = GetConnection()) {
+
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select Cancion_Codigo From Canta Where Artista_Codigo = @artistId";
+
+                command.Parameters.Add("@artistId", MySqlDbType.UInt32).Value = artist.Id;
+
+                using var reader = command.ExecuteReader();
 
                 while (reader.Read()) {
 
-                    var artist = new ArtistModel(reader);
+                    var songId = Convert.ToUInt32(reader["Cancion_Codigo"]);
 
-                    var songs = new List<Task<SongModel?>>();
+                    songTasks.Add(App.SongRepository.GetById(songId));
 
-                    // Canciones que canta
-                    using (var commandCanta = new MySqlCommand()) {
+                }
 
-                        commandCanta.Connection = connection;
+                await Task.WhenAll(songTasks);
 
-                        commandCanta.CommandText = "Select Cancion_Codigo From Canta Where Artista_Codigo = @artistId";
+                foreach (var task in songTasks) {
 
-                        commandCanta.Parameters.Add("@artistId", MySqlDbType.UInt32).Value = artist.Id;
-
-                        using var canta = commandCanta.ExecuteReader();
-
-                        while (canta.Read()) {
-                            var songId = Convert.ToUInt32(canta["Cancion_Codigo"]);
-
-                            songs.Add(songRepository.GetById(songId));
-                        }
-
-                    }
-
-                    await Task.WhenAll(songs);
-
-                    foreach (var song in songs) {
-                        if (song.Result is not null) artist.Songs.Add(song.Result);
-                    }
-
-                    allArtists.Add(artist);
+                    if (task.Result is not null) songs.Add(task.Result);
 
                 }
 
             }
 
-            return allArtists;
+            return songs;
         }
 
-        public async Task<ArtistModel?> GetById(object id) {
-
-            if (id is not uint artistId) return null;
-
-            var all = await GetByAll();
-
-            return (from it in all
-                    where it.Id == artistId
-                    select it).FirstOrDefault();
-
-        }
-
-        public Task<bool> RemoveById(object id) {
+        public Task<bool> RemoveById(object? id) {
             throw new NotImplementedException();
         }
     }

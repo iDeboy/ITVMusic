@@ -11,11 +11,8 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using ITVMusic.Repositories.Bases;
 using ITVMusic.Repositories;
-using System.Windows.Documents;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Windows;
 using System.Diagnostics.CodeAnalysis;
 
 namespace ITVMusic.ViewModels {
@@ -189,9 +186,7 @@ namespace ITVMusic.ViewModels {
 
             Suscriptions.Clear();
 
-            foreach (var it in await suscriptionRepository.GetByAll()) {
-                Suscriptions.Add(it);
-            }
+            Suscriptions.AddRange(await suscriptionRepository.GetByAll());
 
         }
 
@@ -208,9 +203,7 @@ namespace ITVMusic.ViewModels {
 
             AllUsers.Clear();
 
-            foreach (var user in await userRepository.GetByAll()) {
-                AllUsers.Add(user);
-            }
+            AllUsers.AddRange(await userRepository.GetByAll());
 
         }
         private void FillSuscriptionsTest() {

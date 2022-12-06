@@ -6,18 +6,34 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace ITVMusic.Repositories {
     public class PlaylistRepository : RepositoryBase, IPlaylistRepository {
 
-        private IUserRepository userRepository;
-        private IAlmacenRepository almacenRepository;
+        //private readonly IUserRepository userRepository;
+        //private readonly IAlmacenRepository almacenRepository;
 
-        public PlaylistRepository() {
-            userRepository = new UserRepository();
-            almacenRepository = new AlmacenRepository();
+        /*
+        public PlaylistRepository()
+            : this(App.UserRepository, App.AlmacenRepository) {
+
         }
 
+        public PlaylistRepository(IUserRepository userRepository)
+            : this(userRepository, new AlmacenRepository()) {
+
+        }
+        public PlaylistRepository(IAlmacenRepository almacenRepository)
+            : this(new UserRepository(), almacenRepository) {
+
+        }
+
+        public PlaylistRepository(IUserRepository userRepository, IAlmacenRepository almacenRepository) {
+            this.userRepository = userRepository;
+            this.almacenRepository = almacenRepository;
+        }
+        */
         public async Task<bool> Add(PlaylistModel? playlist) {
 
             if (playlist is null) return false;
@@ -49,7 +65,7 @@ namespace ITVMusic.Repositories {
 
             // Revisar si existe la playlist y el usuario en la base de datos
             var allPlaylists = GetByAll();
-            var allUsers = userRepository.GetByAll();
+            var allUsers = App.UserRepository.GetByAll();
 
             await Task.WhenAll(allPlaylists, allUsers);
 
@@ -85,7 +101,7 @@ namespace ITVMusic.Repositories {
 
             // Revisar si existe la playlist y la cancion en la base de datos
             var allPlaylists = GetByAll();
-            var allSongs = almacenRepository.GetByAll();
+            var allSongs = App.AlmacenRepository.GetByAll();
 
             await Task.WhenAll(allPlaylists, allSongs);
 
@@ -93,7 +109,7 @@ namespace ITVMusic.Repositories {
             if (!allSongs.Result.Any(u => u.Id == song.Id)) return false;
 
             // Compobar que la cancion no este ya en la playlist
-            if (allPlaylists.Result.Any(p => p.Id == playlist.Id && p.Songs.Any(s => s.Id == almacen.Id))) return false;
+            if (allPlaylists.Result.Any(p => p.Id == playlist.Id && p.Songs.Any(s => s.Id == song.Id))) return false;
 
             using (var connection = GetConnection()) {
 
@@ -126,77 +142,38 @@ namespace ITVMusic.Repositories {
 
             using (var connection = GetConnection()) {
 
-                using var commandPlaylist = new MySqlCommand();
+                using var command = new MySqlCommand();
 
                 await connection.OpenAsync();
-                commandPlaylist.Connection = connection;
-                commandPlaylist.CommandText = "Select * From PlayList";
+                command.Connection = connection;
+                command.CommandText = "Select * From PlayList;";
 
-                using var reader = commandPlaylist.ExecuteReader();
+                using var reader = await command.ExecuteReaderAsync();
 
-                while (reader.Read()) {
-
-                    var playlist = new PlaylistModel(reader);
-
-                    var authors = new List<Task<UserModel?>>();
-
-                    var songs = new List<Task<AlmacenModel?>>();
-
-                    // Obtener los autores de la playlist
-                    using (var commandCrea = new MySqlCommand()) {
-
-                        commandCrea.Connection = connection;
-                        commandCrea.CommandText = "Select Usuario_NoControl From Crea Where Playlist_Codigo = @playlistId Order By Fecha Asc;";
-
-                        commandCrea.Parameters.Add("@playlistId", MySqlDbType.Int32).Value = playlist.Id;
-
-                        using var crea = commandCrea.ExecuteReader();
-
-                        while (crea.Read()) {
-
-                            authors.Add(userRepository.GetById(crea["Usuario_NoControl"]));
-
-                        }
-
-                    }
-
-                    // Obtener las canciones de la playlist
-                    using (var commandAgrega = new MySqlCommand()) {
-
-                        commandAgrega.Connection = connection;
-                        commandAgrega.CommandText = "Select Almacena_Codigo From Agrega Where Playlist_Codigo = @playlistId Order By Fecha Desc;";
-
-                        commandAgrega.Parameters.Add("@playlistId", MySqlDbType.Int32).Value = playlist.Id;
-
-                        using var agrega = commandAgrega.ExecuteReader();
-
-                        //Cambiar por almacen 
-
-                        while (agrega.Read()) {
-
-                            songs.Add(almacenRepository.GetById(Convert.ToInt32(agrega["Almacena_Codigo"])));
-
-                        }
-
-                    }
-
-                    await Task.WhenAll(authors);
-
-                    foreach (var author in authors) {
-                        if (author.Result is not null) playlist.Authors.Add(author.Result);
-                    }
-
-                    await Task.WhenAll(songs);
-
-                    foreach (var song in songs) {
-                        if (song.Result is not null) playlist.Songs.Add(song.Result);
-                    }
-
-                    allPlaylists.Add(playlist);
-
+                while (await reader.ReadAsync()) {
+                    allPlaylists.Add(new PlaylistModel(reader));
                 }
 
             }
+
+            // Obtener las canciones de la playlist
+            // Obtener los usuario de la playlist
+
+
+            foreach (PlaylistModel playlist in allPlaylists) {
+
+                var songsTask = GetSongs(playlist);
+                var usersTask = GetUsers(playlist);
+
+                await Task.WhenAll(songsTask, usersTask);
+
+                var songs = playlist.Songs.AddRangeAsync(songsTask.Result);
+                var users = playlist.Authors.AddRangeAsync(usersTask.Result);
+
+                await Task.WhenAll(songs, users);
+
+            }
+
 
             return allPlaylists;
         }
@@ -205,12 +182,114 @@ namespace ITVMusic.Repositories {
 
             if (id is not uint playlistId) return null;
 
-            var all = await GetByAll();
+            PlaylistModel? playlist = null;
 
-            return (from it in all
-                    where it.Id == playlistId
-                    select it).FirstOrDefault();
+            using (var connection = GetConnection()) {
 
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select * From PlayList Where Playlist_Codigo = @playlistId;";
+
+                command.Parameters.Add("@playlistId", MySqlDbType.Int32).Value = playlistId;
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read()) {
+                    playlist = new PlaylistModel(reader);
+                }
+
+            }
+
+            return playlist;
+        }
+
+        public async Task<IEnumerable<AlmacenModel>?> GetSongs(PlaylistModel? playlist) {
+
+            if (playlist is null) return null;
+
+            List<AlmacenModel> songs = new();
+            List<Task<AlmacenModel?>> songsTasks = new();
+
+            using (var connection = GetConnection()) {
+
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select Almacena_Codigo From Agrega Where Playlist_Codigo = @playlistId Order By Fecha Desc;";
+
+                command.Parameters.Add("@playlistId", MySqlDbType.Int32).Value = playlist.Id;
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read()) {
+
+                    var almacenId = Convert.ToUInt32(reader["Almacena_Codigo"]);
+
+                    songsTasks.Add(App.AlmacenRepository.GetById(almacenId));
+
+                }
+
+                await Task.WhenAll(songsTasks);
+
+                foreach (var task in songsTasks) {
+
+                    if (task.Result is not null) songs.Add(task.Result);
+
+                }
+
+            }
+
+            return songs;
+
+        }
+
+        public async Task<IEnumerable<UserModel>?> GetUsers(PlaylistModel? playlist) {
+
+            if (playlist is null) return null;
+
+            List<UserModel> users = new();
+            List<Task<UserModel?>> usersTasks = new();
+
+            using (var connection = GetConnection()) {
+
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select Usuario_NoControl From Crea Where Playlist_Codigo = @playlistId Order By Fecha Asc;";
+
+                command.Parameters.Add("@playlistId", MySqlDbType.Int32).Value = playlist.Id;
+
+                using var reader = await command.ExecuteReaderAsync();
+
+                while (await reader.ReadAsync()) {
+
+                    var noControl = Convert.ToString(reader["Usuario_NoControl"]);
+
+                    usersTasks.Add(App.UserRepository.GetById(noControl));
+
+                }
+
+                await Task.WhenAll(usersTasks);
+
+                foreach (var task in usersTasks) {
+
+                    if (task.Result is not null) users.Add(task.Result);
+
+                }
+
+            }
+
+            return users;
         }
 
         public Task<bool> RemoveById(object? id) {

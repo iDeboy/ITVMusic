@@ -1,13 +1,7 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
 using FontAwesome.Sharp;
-using ITVMusic.Util;
+using ITVMusic.Models;
 
 namespace ITVMusic.Views {
     /// <summary>
@@ -19,7 +13,7 @@ namespace ITVMusic.Views {
             App.CurrentSongChanged += App_CurrentSongChanged;
         }
 
-        private void App_CurrentSongChanged(object? sender, Models.SongModel? e) {
+        private void App_CurrentSongChanged(object? sender, AlmacenModel? e) {
 
             /*if (m_MediaButton.Content is not IconBlock icon) return;
 

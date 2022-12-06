@@ -1,20 +1,12 @@
 ﻿using ITVMusic.Repositories;
 using ITVMusic.Repositories.Bases;
 using ITVMusic.Views;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+using System.Diagnostics.CodeAnalysis;
 using System.Security;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
-namespace ITVMusic.ViewModels
-{
+namespace ITVMusic.ViewModels {
     public class LoginViewModel : ViewModelBase {
 
         // Fields
@@ -92,7 +84,7 @@ namespace ITVMusic.ViewModels
             ExecuteCloseCommand(obj);
         }
 
-        private static bool ValidarUsername(string? username, out string errors) {
+        private static bool ValidarUsername([NotNullWhen(true)] string? username, out string errors) {
             errors = "";
 
             // Validar si el campo está vacio
@@ -114,7 +106,7 @@ namespace ITVMusic.ViewModels
             return true;
         }
 
-        private static bool ValidarPassword(SecureString? password, out string errors) {
+        private static bool ValidarPassword([NotNullWhen(true)] SecureString? password, out string errors) {
 
             errors = "";
             if (password is null || password.Length is 0) {

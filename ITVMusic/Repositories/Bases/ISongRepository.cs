@@ -10,5 +10,6 @@ namespace ITVMusic.Repositories.Bases {
 
         public Task<bool> AttatchArtist(SongModel? song, ArtistModel? artist);
 
+        public Task<IEnumerable<ArtistModel>?> GetArtists(SongModel? song);
     }
 }

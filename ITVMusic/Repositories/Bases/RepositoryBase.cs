@@ -18,6 +18,7 @@ namespace ITVMusic.Repositories.Bases {
                 Database = "ITVMusic",
                 UserID = "App",
                 Password = "hono2002",
+                //ConnectionTimeout = 5
             }.ConnectionString;
 
         }

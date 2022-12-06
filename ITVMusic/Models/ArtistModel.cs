@@ -28,7 +28,7 @@ namespace ITVMusic.Models {
         public string? Description { get; set; }
         public ImageSource? Icon { get; set; }
 
-        public ObservableCollection<SongModel> Songs { get; set; } = new();
+        public ObservableCollection<SongModel> Songs { get; } = new();
 
     }
 }

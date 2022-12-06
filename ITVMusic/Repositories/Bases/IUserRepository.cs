@@ -11,6 +11,8 @@ namespace ITVMusic.Repositories.Bases {
         Task<UserModel?> GetByUsername(string? username);
         Task<UserModel?> GetByNoControlOrUsername(string? key);
 
+        Task<IEnumerable<PlaylistModel>?> GetPlaylists(UserModel? user);
+        Task<IEnumerable<AlmacenModel>?> GetListenedSongs(UserModel? user);
 
     }
 }

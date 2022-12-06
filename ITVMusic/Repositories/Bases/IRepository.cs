@@ -10,8 +10,8 @@ namespace ITVMusic.Repositories.Bases {
 
         Task<bool> Add(T? obj);
         Task<bool> Edit(T? obj);
-        Task<bool> RemoveById(object id);
-        Task<T?> GetById(object id);
+        Task<bool> RemoveById(object? id);
+        Task<T?> GetById(object? id);
         Task<IEnumerable<T>> GetByAll();
 
     }

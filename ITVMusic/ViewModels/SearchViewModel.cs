@@ -1,17 +1,18 @@
 ﻿using ITVMusic.Models;
+using ITVMusic.Repositories;
+using ITVMusic.Repositories.Bases;
 using ITVMusic.Util;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Media;
-using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 
 namespace ITVMusic.ViewModels {
     public class SearchViewModel : ViewModelBase {
+
+        private readonly IAlmacenRepository almacenRepository;
+        private readonly IPlaylistRepository playlistRepository;
+        private readonly IAlbumRepository albumRepository;
 
         private ObservableCollection<IMusicModelBase>? m_MusicItemsFound;
         private IMusicModelBase? m_SelectedMusicModel;
@@ -34,20 +35,34 @@ namespace ITVMusic.ViewModels {
         }
 
         public SearchViewModel() {
-
             MusicItems = new();
 
-            FillMusicItemsTest();
+            almacenRepository = new AlmacenRepository();
+            playlistRepository = new PlaylistRepository();
+            albumRepository = new AlbumRepository();
 
+            // FillMusicItemsTest();
+            FillMusicItems();
+
+        }
+
+        private async void FillMusicItems() {
+
+            MusicItems.AddRange(await almacenRepository.GetByAll());
+            MusicItems.AddRange(await playlistRepository.GetByAll());
+            MusicItems.AddRange(await albumRepository.GetByAll());
+
+            MessageBox.Show("Cargados");
         }
 
         private void FillMusicItemsTest() {
 
-            var songs = new ObservableCollection<SongModel>();
+            //var songs = new ObservableCollection<SongModel>();
 
+            /* Get Songs
             for (uint i = 1; i < 10; i++) {
 
-                var song = new SongModel() {
+                var song = new AlmacenModel() {
                     Id = i,
                     //Icon = File.ReadAllBytes(@"C:\Users\iDeboy\Pictures\fondo2.jpg").ToImage(),
                     Title = $"Canción {i}",
@@ -60,7 +75,9 @@ namespace ITVMusic.ViewModels {
                 MusicItems.Add(song);
                 songs.Add(song);
             }
+            */
 
+            /* Get Playlists
             for (uint i = 1; i < 5; i++) {
 
                 MusicItems.Add(new PlaylistModel() {
@@ -71,7 +88,9 @@ namespace ITVMusic.ViewModels {
                 });
 
             }
+            */
 
+            /* Get Albums
             for (uint i = 1; i < 10; i++) {
 
                 MusicItems.Add(new AlbumModel() {
@@ -82,7 +101,7 @@ namespace ITVMusic.ViewModels {
                 });
 
             }
-
+            */
         }
 
     }

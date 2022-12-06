@@ -71,7 +71,9 @@ namespace ITVMusic.Repositories {
                 using var command = new MySqlCommand();
 
                 await connection.OpenAsync();
+
                 command.Connection = connection;
+
                 command.CommandText = "Select * From Suscripcion";
 
                 using var reader = command.ExecuteReader();
@@ -91,11 +93,31 @@ namespace ITVMusic.Repositories {
 
             if (id is not ushort suscriptionId) return null;
 
-            var all = await GetByAll();
+            SuscriptionModel? suscription = null;
 
-            return (from it in all
-                    where it.Id == suscriptionId
-                    select it).FirstOrDefault();
+            using (var connection = GetConnection()) {
+
+                using var command = new MySqlCommand();
+
+                await connection.OpenAsync();
+
+                command.Connection = connection;
+
+                command.CommandText = "Select * From Suscripcion Where Suscripcion_Codigo = @suscriptionId;";
+
+                command.Parameters.Add("@suscriptionId", MySqlDbType.UInt16).Value = suscriptionId;
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read()) {
+
+                    suscription = new SuscriptionModel(reader);
+
+                }
+
+            }
+
+            return suscription;
 
         }
 
