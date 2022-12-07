@@ -11,17 +11,15 @@ using System.Threading.Tasks;
 
 namespace ITVMusic.Repositories {
     public class SuscriptionRepository : RepositoryBase, ISuscriptionRepository {
-        public async Task<bool> Add(SuscriptionModel? suscription) {
+        public bool Add(SuscriptionModel? suscription) {
 
             if (suscription is null) return false;
 
-            using (var connection = GetConnection()) {
+            var connection = GetConnection();
 
-                using var command = new MySqlCommand();
+            connection.Open();
 
-                await connection.OpenAsync();
-
-                command.Connection = connection;
+            using (var command = connection.CreateCommand()) {
 
                 command.CommandText = "Insert Into Suscripcion (Suscripcion_MetodoPago, Suscripcion_Tipo)\n";
                 command.CommandText += "Value (@paymentMethod, @type);";
@@ -32,21 +30,47 @@ namespace ITVMusic.Repositories {
                 command.ExecuteNonQuery();
             }
 
+            connection.Open();
+
             return true;
         }
 
-        public async Task<bool> AutenticateUserSuscription(UserModel? user) {
+        public async Task<bool> AddAsync(SuscriptionModel? suscription) {
+
+            if (suscription is null) return false;
+
+            var connection = GetConnection();
+
+            await connection.OpenAsync();
+
+            using (var command = connection.CreateCommand()) {
+
+                command.CommandText = "Insert Into Suscripcion (Suscripcion_MetodoPago, Suscripcion_Tipo)\n";
+                command.CommandText += "Value (@paymentMethod, @type);";
+
+                command.Parameters.Add("@paymentMethod", MySqlDbType.VarChar).Value = suscription.PaymentMethod;
+                command.Parameters.Add("@type", MySqlDbType.VarChar).Value = suscription.Type;
+
+                await command.ExecuteNonQueryAsync();
+            }
+
+            await connection.CloseAsync();
+
+            return true;
+        }
+
+        public bool AutenticateUserSuscription(UserModel? user) {
 
             bool isValidSuscription = false;
 
             if (user is null) return false;
 
-            using (var connection = GetConnection()) {
+            var connection = GetConnection();
 
-                using var command = new MySqlCommand();
+            connection.Open();
 
-                await connection.OpenAsync();
-                command.Connection = connection;
+            using (var command = connection.CreateCommand()) {
+
                 command.CommandText = "Select Caducada From Suscripciones Where Usuario_NoControl = @noControl";
                 command.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = user.NoControl;
 
@@ -55,53 +79,103 @@ namespace ITVMusic.Repositories {
                 isValidSuscription = caducada;
             }
 
+            connection.Close();
+
             return isValidSuscription;
         }
 
-        public Task<bool> Edit(SuscriptionModel? suscription) {
+        public async Task<bool> AutenticateUserSuscriptionAsync(UserModel? user) {
+
+            bool isValidSuscription = false;
+
+            if (user is null) return false;
+
+            var connection = GetConnection();
+
+            await connection.OpenAsync();
+
+            using (var command = connection.CreateCommand()) {
+
+                command.CommandText = "Select Caducada From Suscripciones Where Usuario_NoControl = @noControl";
+                command.Parameters.Add("@noControl", MySqlDbType.VarChar).Value = user.NoControl;
+
+                bool caducada = Convert.ToBoolean(await command.ExecuteScalarAsync());
+
+                isValidSuscription = caducada;
+            }
+
+            await connection.CloseAsync();
+
+            return isValidSuscription;
+        }
+
+        public bool Edit(SuscriptionModel? suscription) {
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<SuscriptionModel>> GetByAll() {
+        public Task<bool> EditAsync(SuscriptionModel? obj) {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<SuscriptionModel> GetByAll() {
 
             List<SuscriptionModel> allSuscriptions = new();
 
-            using (var connection = GetConnection()) {
+            var connection = GetConnection();
 
-                using var command = new MySqlCommand();
+            connection.Open();
 
-                await connection.OpenAsync();
+            using (var command = connection.CreateCommand()) {
 
-                command.Connection = connection;
-
-                command.CommandText = "Select * From Suscripcion";
+                command.CommandText = "Select * From Suscripcion;";
 
                 using var reader = command.ExecuteReader();
 
-                while (reader.Read()) {
-
+                while (reader.Read())
                     allSuscriptions.Add(new SuscriptionModel(reader));
 
-                }
-
             }
+
+            connection.Close();
 
             return allSuscriptions;
         }
 
-        public async Task<SuscriptionModel?> GetById(object? id) {
+        public async Task<IEnumerable<SuscriptionModel>> GetByAllAsync() {
+
+            List<SuscriptionModel> allSuscriptions = new();
+
+            var connection = GetConnection();
+
+            await connection.OpenAsync();
+
+            using (var command = connection.CreateCommand()) {
+
+                command.CommandText = "Select * From Suscripcion;";
+
+                using var reader = await command.ExecuteReaderAsync();
+
+                while (await reader.ReadAsync())
+                    allSuscriptions.Add(new SuscriptionModel(reader));
+
+            }
+
+            await connection.CloseAsync();
+
+            return allSuscriptions;
+        }
+
+        public SuscriptionModel? GetById(object? id) {
 
             if (id is not ushort suscriptionId) return null;
 
             SuscriptionModel? suscription = null;
 
-            using (var connection = GetConnection()) {
+            var connection = GetConnection();
 
-                using var command = new MySqlCommand();
+            connection.Open();
 
-                await connection.OpenAsync();
-
-                command.Connection = connection;
+            using (var command = connection.CreateCommand()) {
 
                 command.CommandText = "Select * From Suscripcion Where Suscripcion_Codigo = @suscriptionId;";
 
@@ -109,19 +183,48 @@ namespace ITVMusic.Repositories {
 
                 using var reader = command.ExecuteReader();
 
-                if (reader.Read()) {
-
-                    suscription = new SuscriptionModel(reader);
-
-                }
+                if (reader.Read()) suscription = new SuscriptionModel(reader);
 
             }
+
+            connection.Close();
 
             return suscription;
 
         }
 
-        public Task<bool> RemoveById(object? id) {
+        public async Task<SuscriptionModel?> GetByIdAsync(object? id) {
+
+            if (id is not ushort suscriptionId) return null;
+
+            SuscriptionModel? suscription = null;
+
+            var connection = GetConnection();
+
+            await connection.OpenAsync();
+
+            using (var command = connection.CreateCommand()) {
+
+                command.CommandText = "Select * From Suscripcion Where Suscripcion_Codigo = @suscriptionId;";
+
+                command.Parameters.Add("@suscriptionId", MySqlDbType.UInt16).Value = suscriptionId;
+
+                using var reader = await command.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync()) suscription = new SuscriptionModel(reader);
+
+            }
+
+            await connection.CloseAsync();
+
+            return suscription;
+        }
+
+        public bool RemoveById(object? id) {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> RemoveByIdAsync(object? id) {
             throw new NotImplementedException();
         }
     }

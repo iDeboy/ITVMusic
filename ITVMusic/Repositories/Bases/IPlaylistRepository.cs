@@ -8,10 +8,13 @@ using System.Threading.Tasks;
 namespace ITVMusic.Repositories.Bases {
     public interface IPlaylistRepository : IRepository<PlaylistModel> {
 
-        Task<bool> AttatchAuthor(UserModel? user, PlaylistModel? playlist);
-        Task<bool> AttatchSong(AlmacenModel? song, PlaylistModel? playlist);
+        bool AttatchAuthor(UserModel? user, PlaylistModel? playlist);
+        bool AttatchSong(AlmacenModel? song, PlaylistModel? playlist);
+        IEnumerable<PlaylistModel>? GetFrom(UserModel? user);
 
-        Task<IEnumerable<UserModel>?> GetUsers(PlaylistModel? playlist);
-        Task<IEnumerable<AlmacenModel>?> GetSongs(PlaylistModel? playlist);
+        Task<bool> AttatchAuthorAsync(UserModel? user, PlaylistModel? playlist);
+        Task<bool> AttatchSongAsync(AlmacenModel? song, PlaylistModel? playlist);
+        Task<IEnumerable<PlaylistModel>?> GetFromAsync(UserModel? user);
+
     }
 }

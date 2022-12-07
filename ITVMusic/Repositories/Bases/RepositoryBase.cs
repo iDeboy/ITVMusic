@@ -13,10 +13,11 @@ namespace ITVMusic.Repositories.Bases {
         protected RepositoryBase() {
 
             ConnectionString = new MySqlConnectionStringBuilder() {
-                Server = "192.168.0.152",
+                Server = "localhost",
+                //Server = "192.168.0.152",
                 //Server = "172.20.10.12",
                 Database = "ITVMusic",
-                UserID = "App",
+                UserID = "root",
                 Password = "hono2002",
                 //ConnectionTimeout = 5
             }.ConnectionString;

@@ -18,11 +18,6 @@ using System.Diagnostics.CodeAnalysis;
 namespace ITVMusic.ViewModels {
     public class RegisterViewModel : ViewModelBase {
 
-        // Data
-        private readonly IUserRepository userRepository;
-        private readonly ISuscriptionRepository suscriptionRepository;
-
-
         // Fields
         private ImageSource? m_Icon;
         private string? m_LastNamePat;
@@ -163,12 +158,9 @@ namespace ITVMusic.ViewModels {
             Genders = new();
             AllUsers = new();
 
-            userRepository = new UserRepository();
-            suscriptionRepository = new SuscriptionRepository();
-
             InitSuscriptions();
             InitGenders();
-            InitAllUsers();
+            //InitAllUsers();
 
             CloseCommand = new ViewModelCommand(ExecuteCloseCommand, CanExecuteCloseCommand);
             RegisterCommand = new ViewModelCommand(ExecuteRegisterCommand, CanExecuteRegisterCommand);
@@ -186,7 +178,7 @@ namespace ITVMusic.ViewModels {
 
             Suscriptions.Clear();
 
-            Suscriptions.AddRange(await suscriptionRepository.GetByAll());
+            Suscriptions.AddRange(await App.SuscriptionRepository.GetByAllAsync());
 
         }
 
@@ -203,7 +195,7 @@ namespace ITVMusic.ViewModels {
 
             AllUsers.Clear();
 
-            AllUsers.AddRange(await userRepository.GetByAll());
+            AllUsers.AddRange(await App.UserRepository.GetByAllAsync());
 
         }
         private void FillSuscriptionsTest() {
@@ -263,7 +255,7 @@ namespace ITVMusic.ViewModels {
 
             return true;
         }
-        private bool ValidarNoControl([NotNullWhen(true)] string? noControl, out string errors) {
+        private static bool ValidarNoControl([NotNullWhen(true)] string? noControl, out string errors) {
             errors = "";
 
             // Validar si el campo está vacio
@@ -289,14 +281,16 @@ namespace ITVMusic.ViewModels {
             }
 
             // Validar si no existe
-            if (AllUsers.Any(u => u.NoControl == noControl)) {
+            var user = App.UserRepository.GetById(noControl);
+
+            if (user is not null) {
                 errors = "No. Control ya está registrado.";
                 return false;
             }
 
             return true;
         }
-        private bool ValidarNickname([NotNullWhen(true)] string? nickname, out string errors) {
+        private static bool ValidarNickname([NotNullWhen(true)] string? nickname, out string errors) {
             errors = "";
 
             // Validar si el campo está vacio
@@ -311,7 +305,9 @@ namespace ITVMusic.ViewModels {
             }
 
             // Validar si no existe
-            if (AllUsers.Any(u => u.Nickname == nickname)) {
+            var user = App.UserRepository.GetByUsername(nickname);
+
+            if (user is not null) {
                 errors = "Nickname ya está registrado.";
                 return false;
             }
@@ -416,7 +412,9 @@ namespace ITVMusic.ViewModels {
             }
 
             // Validar de que ya no este registrada
-            if (AllUsers.Any(u => u.Email == email)) {
+            var user = App.UserRepository.GetByEmail(email);
+
+            if (user is not null) {
                 errors = "Correo ya está registrado.";
                 return false;
             }
@@ -512,7 +510,7 @@ namespace ITVMusic.ViewModels {
                 return;
             }
 
-            IsRegisterSuccessful = await userRepository.Add(new() {
+            IsRegisterSuccessful = App.UserRepository.Add(new() {
                 Icon = Icon,
                 Birthday = Birthday!.Value,
                 NoControl = NoControl,

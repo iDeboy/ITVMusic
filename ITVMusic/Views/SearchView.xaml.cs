@@ -26,10 +26,10 @@ namespace ITVMusic.Views {
                 return;
             }
 
-            model.MusicItemsFound = new(from it in model.MusicItems
+            model.MusicItemsFound = new(from it in App.MusicItems
                                         where it.Title is not null && it.Title.ContainsWithoutDiacritics(txtBox.Text, StringComparison.InvariantCultureIgnoreCase)
                                         select it);
-            
+
         }
 
     }

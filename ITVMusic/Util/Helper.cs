@@ -26,15 +26,18 @@ namespace ITVMusic.Util {
 
         }
 
-        public static Task AddRangeAsync<T>(this Collection<T> self, IEnumerable<T?>? collection) {
-            return Task.Run(() => self.AddRange(collection));
-        }
-
-        public static async Task<byte[]?> ToByteArray(this ImageSource? image) {
+        public static async Task<byte[]?> ToByteArrayAsync(this ImageSource? image) {
 
             if (image is not BitmapImage bitmapImage) return null;
 
             return await File.ReadAllBytesAsync(bitmapImage.UriSource.LocalPath);
+        }
+
+        public static byte[]? ToByteArray(this ImageSource? image) {
+
+            if (image is not BitmapImage bitmapImage) return null;
+
+            return File.ReadAllBytes(bitmapImage.UriSource.LocalPath);
         }
 
         public static bool IsFuture(this DateOnly date) {
@@ -92,8 +95,12 @@ namespace ITVMusic.Util {
             return Convert.ToUInt32(obj);
         }
 
-        public static Task Save(this byte[] bytes, string path) {
+        public static Task SaveAsync(this byte[] bytes, string path) {
             return File.WriteAllBytesAsync(path, bytes);
+        }
+
+        public static void Save(this byte[] bytes, string path) {
+            File.WriteAllBytes(path, bytes);
         }
 
         public static string RemoveDiacritics(this string text) {

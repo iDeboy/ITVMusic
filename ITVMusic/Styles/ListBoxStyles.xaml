@@ -41,7 +41,7 @@
                                            HorizontalAlignment="Right"/>
 
                                 <StackPanel Margin="10" 
-                                        Orientation="Horizontal">
+                                            Orientation="Horizontal">
 
                                     <WrapPanel Orientation="Vertical" Width="140">
 

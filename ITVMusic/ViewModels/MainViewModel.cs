@@ -1,8 +1,13 @@
 ﻿using FontAwesome.Sharp;
 using ITVMusic.Models;
+using ITVMusic.Util;
+using ITVMusic.Views;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -14,7 +19,7 @@ namespace ITVMusic.ViewModels {
         private DispatcherTimer timer;
 
         // Fields
-        private ViewModelBase? m_CurrentChildView;
+        private UserControl? m_CurrentChildView;
         private string? m_Caption;
         private IconChar m_Icon;
         private UserAccountModel? m_UserAccount;
@@ -24,7 +29,7 @@ namespace ITVMusic.ViewModels {
         private Duration m_CurrentSongPosition;
         private IconChar m_IconPlayer;
 
-        public ViewModelBase? CurrentChildView {
+        public UserControl? CurrentChildView {
             get => m_CurrentChildView;
             set {
                 m_CurrentChildView = value;
@@ -180,6 +185,7 @@ namespace ITVMusic.ViewModels {
             if (e is AlmacenModel song) {
 
                 // Hacer un insert a Escucha
+                var escucha = App.UserRepository.ListenToSongAsync(App.UserData, song);
 
                 IconPlayer = IconChar.PlayCircle;
 
@@ -193,6 +199,8 @@ namespace ITVMusic.ViewModels {
 
                 timer.Start();
 
+                await escucha;
+
                 return;
             }
 
@@ -200,7 +208,7 @@ namespace ITVMusic.ViewModels {
             // esa playlist y si se da clic en alguna canción reproducirla
 
             if (e is PlaylistModel playlist) {
-                CurrentChildView = new PlaylistViewModel(); // <- View para las playlist
+                CurrentChildView = new PlaylistView(); // <- View para las playlist
                 Caption = $"{playlist.Title}";
                 Icon = IconChar.Headphones;
                 return;
@@ -210,7 +218,7 @@ namespace ITVMusic.ViewModels {
             // esa playlist y si se da clic en alguna canción reproducirla
 
             if (e is AlbumModel album) {
-                CurrentChildView = new AlbumViewModel(); // <- View para los albums
+                CurrentChildView = new AlbumView(); // <- View para los albums
                 Caption = $"{album.Title}";
                 Icon = IconChar.CompactDisc;
                 return;
@@ -245,7 +253,7 @@ namespace ITVMusic.ViewModels {
 
         private void ExecuteCreatePlaylistCommand(object? obj) {
 
-            CurrentChildView = null;
+            CurrentChildView = new CreatePlaylistView();
             Caption = "Crear playlist";
             Icon = IconChar.PlusSquare;
         }
@@ -260,7 +268,7 @@ namespace ITVMusic.ViewModels {
 
         private void ExecuteSearchCommand(object? obj) {
 
-            CurrentChildView = new SearchViewModel();
+            CurrentChildView = new SearchView();
             Caption = "Buscar";
             Icon = IconChar.Search;
 

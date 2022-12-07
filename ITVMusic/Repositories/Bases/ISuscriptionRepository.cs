@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 namespace ITVMusic.Repositories.Bases {
     public interface ISuscriptionRepository : IRepository<SuscriptionModel> {
 
-        Task<bool> AutenticateUserSuscription(UserModel? user);
+        bool AutenticateUserSuscription(UserModel? user);
+        Task<bool> AutenticateUserSuscriptionAsync(UserModel? user);
 
     }
 }

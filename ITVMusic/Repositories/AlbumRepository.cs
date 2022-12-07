@@ -1,8 +1,6 @@
 ﻿using ITVMusic.Models;
 using ITVMusic.Repositories.Bases;
 using ITVMusic.Util;
-using ITVMusic.Views;
-using Microsoft.VisualBasic.ApplicationServices;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
@@ -11,57 +9,104 @@ using System.Threading.Tasks;
 
 namespace ITVMusic.Repositories {
     public class AlbumRepository : RepositoryBase, IAlbumRepository {
-
-        // private readonly IAlmacenRepository almacenRepository;
-        /*
-        public AlbumRepository()
-            : this(App.AlmacenRepository) {
-        }
-
-        public AlbumRepository(IAlmacenRepository almacenRepository) {
-            this.almacenRepository = almacenRepository;
-        }
-        */
-        public async Task<bool> Add(AlbumModel? album) {
+        public bool Add(AlbumModel? album) {
 
             if (album is null) return false;
 
-            using (var connection = GetConnection()) {
+            var connection = GetConnection();
 
-                using var command = new MySqlCommand();
+            connection.Open();
 
-                await connection.OpenAsync();
-
-                command.Connection = connection;
+            using (var command = connection.CreateCommand()) {
 
                 command.CommandText = "Insert Into Album (Album_Titulo, Album_Lanzamiento, Album_Icono)\n";
                 command.CommandText += "Values (@titulo, @lanzamiento, @icono);";
 
                 command.Parameters.Add("@titulo", MySqlDbType.TinyText).Value = album.Title;
                 command.Parameters.Add("@lanzamiento", MySqlDbType.Date).Value = album.RealeseDate;
-                command.Parameters.Add("@icono", MySqlDbType.MediumBlob).Value = await album.Icon.ToByteArray();
+                command.Parameters.Add("@icono", MySqlDbType.MediumBlob).Value = album.Icon.ToByteArray();
 
                 command.ExecuteNonQuery();
             }
+
+            connection.Close();
 
             return true;
 
         }
 
-        public Task<bool> Edit(AlbumModel? album) {
+        public async Task<bool> AddAsync(AlbumModel? album) {
+
+            if (album is null) return false;
+
+            var connection = GetConnection();
+
+            await connection.OpenAsync();
+
+            using (var command = connection.CreateCommand()) {
+
+
+                command.CommandText = "Insert Into Album (Album_Titulo, Album_Lanzamiento, Album_Icono)\n";
+                command.CommandText += "Values (@titulo, @lanzamiento, @icono);";
+
+                command.Parameters.Add("@titulo", MySqlDbType.TinyText).Value = album.Title;
+                command.Parameters.Add("@lanzamiento", MySqlDbType.Date).Value = album.RealeseDate;
+                command.Parameters.Add("@icono", MySqlDbType.MediumBlob).Value = await album.Icon.ToByteArrayAsync();
+
+                await command.ExecuteNonQueryAsync();
+            }
+
+            await connection.CloseAsync();
+
+            return true;
+        }
+
+        public bool Edit(AlbumModel? obj) {
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<AlbumModel>> GetByAll() {
+        public Task<bool> EditAsync(AlbumModel? album) {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<AlbumModel> GetByAll() {
 
             List<AlbumModel> allAlbums = new();
 
-            using (var connection = GetConnection()) {
+            var connection = GetConnection();
 
-                using var commmand = new MySqlCommand();
+            connection.Open();
 
-                await connection.OpenAsync();
-                commmand.Connection = connection;
+            using (var commmand = connection.CreateCommand()) {
+
+                commmand.CommandText = "Select * From Album;";
+
+                using var reader = commmand.ExecuteReader();
+
+                while (reader.Read()) {
+
+                    allAlbums.Add(new AlbumModel(reader));
+
+                }
+
+            }
+
+            connection.Close();
+
+            return allAlbums;
+
+        }
+
+        public async Task<IEnumerable<AlbumModel>> GetByAllAsync() {
+
+            List<AlbumModel> allAlbums = new();
+
+            var connection = GetConnection();
+
+            await connection.OpenAsync();
+
+            using (var commmand = connection.CreateCommand()) {
+
                 commmand.CommandText = "Select * From Album;";
 
                 using var reader = await commmand.ExecuteReaderAsync();
@@ -74,30 +119,49 @@ namespace ITVMusic.Repositories {
 
             }
 
-            // Obtener las canciones del album
-
-            foreach (AlbumModel album in allAlbums) {
-                var songs = await GetSongs(album);
-
-                album.Songs.AddRange(songs);
-            }
+            await connection.CloseAsync();
 
             return allAlbums;
         }
 
-        public async Task<AlbumModel?> GetById(object? id) {
+        public AlbumModel? GetById(object? id) {
 
             if (id is not uint albumId) return null;
 
             AlbumModel? album = null;
 
-            using (var connection = GetConnection()) {
+            var connection = GetConnection();
 
-                using var commmand = new MySqlCommand();
+            connection.Open();
 
-                await connection.OpenAsync();
+            using (var commmand = connection.CreateCommand()) {
 
-                commmand.Connection = connection;
+                commmand.CommandText = "Select * From Album Where Album_Codigo = @albumId;";
+
+                commmand.Parameters.Add("@albumId", MySqlDbType.UInt32).Value = albumId;
+
+                using var reader = commmand.ExecuteReader();
+
+                if (reader.Read()) album = new AlbumModel(reader);
+
+            }
+
+            connection.Close();
+
+            return album;
+        }
+
+        public async Task<AlbumModel?> GetByIdAsync(object? id) {
+
+            if (id is not uint albumId) return null;
+
+            AlbumModel? album = null;
+
+            var connection = GetConnection();
+
+            await connection.OpenAsync();
+
+            using (var commmand = connection.CreateCommand()) {
 
                 commmand.CommandText = "Select * From Album Where Album_Codigo = @albumId;";
 
@@ -105,62 +169,80 @@ namespace ITVMusic.Repositories {
 
                 using var reader = await commmand.ExecuteReaderAsync();
 
-                if (await reader.ReadAsync()) {
-
-                    album = new AlbumModel(reader);
-
-                }
+                if (await reader.ReadAsync()) album = new AlbumModel(reader);
 
             }
+
+            await connection.CloseAsync();
 
             return album;
         }
 
-        public async Task<IEnumerable<AlmacenModel>?> GetSongs(AlbumModel? album) {
+        public AlbumModel? GetFrom(AlmacenModel? almacen) {
 
-            if (album is null) return null;
+            if (almacen is null) return null;
 
-            var songs = new List<AlmacenModel>();
+            uint albumId = 0;
 
-            var songTasks = new List<Task<AlmacenModel?>>();
+            var connection = GetConnection();
 
-            using (var connection = GetConnection()) {
+            connection.Open();
 
-                using var command = new MySqlCommand();
+            using (var command = connection.CreateCommand()) {
 
-                await connection.OpenAsync();
+                command.CommandText = "Select Album_Codigo From Almacena Where Almacena_Codigo = @almacenId;";
 
-                command.Connection = connection;
-
-                command.CommandText = "Select Cancion_Codigo From Almacena Where Album_Codigo = @albumId Order By Fecha Desc;";
-
-                command.Parameters.Add("@albumId", MySqlDbType.Int32).Value = album.Id;
+                command.Parameters.Add("@almacenId", MySqlDbType.VarChar).Value = almacen.Id;
 
                 using var reader = command.ExecuteReader();
 
-                while (reader.Read()) {
-
-                    var songId = Convert.ToUInt32(reader["Cancion_Codigo"]);
-
-                    songTasks.Add(App.AlmacenRepository.GetById(songId));
-
-                }
-
-                await Task.WhenAll(songTasks);
-
-                foreach (var task in songTasks) {
-
-                    if (task.Result is not null) songs.Add(task.Result);
-
+                if (reader.Read()) {
+                    albumId = Convert.ToUInt32(reader["Album_Codigo"]);
                 }
 
             }
 
-            return songs;
+            connection.Close();
+
+            return GetById(albumId);
 
         }
 
-        public Task<bool> RemoveById(object? id) {
+        public async Task<AlbumModel?> GetFromAsync(AlmacenModel? almacen) {
+
+            if (almacen is null) return null;
+
+            uint albumId = 0;
+
+            var connection = GetConnection();
+
+            await connection.OpenAsync();
+
+            using (var command = connection.CreateCommand()) {
+
+                command.CommandText = "Select Album_Codigo From Almacena Where Almacena_Codigo = @almacenId;";
+
+                command.Parameters.Add("@almacenId", MySqlDbType.VarChar).Value = almacen.Id;
+
+                using var reader = await command.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync()) {
+                    albumId = Convert.ToUInt32(reader["Album_Codigo"]);
+                }
+
+            }
+
+            await connection.CloseAsync();
+
+            return await GetByIdAsync(albumId);
+
+        }
+
+        public bool RemoveById(object? id) {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> RemoveByIdAsync(object? id) {
             throw new NotImplementedException();
         }
     }

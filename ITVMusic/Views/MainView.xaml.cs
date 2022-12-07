@@ -1,7 +1,11 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using FontAwesome.Sharp;
 using ITVMusic.Models;
+using ITVMusic.Util;
 
 namespace ITVMusic.Views {
     /// <summary>
@@ -104,6 +108,12 @@ namespace ITVMusic.Views {
             //     return;
              }*/
 
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e) {
+            await App.InitMusicElements();
+
+            m_ProgressBar.Visibility = Visibility.Collapsed;
         }
 
         /*private void MediaElement_SourceUpdated(object sender, System.Windows.Data.DataTransferEventArgs e) {

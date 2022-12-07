@@ -17,13 +17,14 @@
         Icon="{DynamicResource LogoJpeg}"
         Visibility="{Binding IsViewVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilty}}"
         
-        IsVisibleChanged="Window_IsVisibleChanged">
+        IsVisibleChanged="Window_IsVisibleChanged"
+        Loaded="Window_Loaded">
 
     <Window.DataContext>
         <viewModels:MainViewModel x:Name="model"/>
     </Window.DataContext>
 
-    <Window.Resources>
+    <!--<Window.Resources>
         <DataTemplate DataType="{x:Type viewModels:SearchViewModel}">
             <local:SearchView/>
         </DataTemplate>
@@ -35,7 +36,7 @@
         <DataTemplate DataType="{x:Type viewModels:AlbumViewModel}">
             <local:AlbumView/>
         </DataTemplate>
-    </Window.Resources>
+    </Window.Resources>-->
 
     <Border CornerRadius="10"
             Background="{DynamicResource WindowBackground}"
@@ -68,6 +69,14 @@
                                  materialDesign:ElevationAssist.Elevation="Dp8">
 
                 <StackPanel Margin="0,30,0,0">
+
+                    <ProgressBar x:Name="m_ProgressBar" 
+                                 x:FieldModifier="private"
+                                 Visibility="Collapsed"
+                                 IsIndeterminate="True"
+                                 Height="20"
+                                 Background="Transparent"
+                                 Foreground="{DynamicResource CaptionColor}"/>
 
                     <Image Width="130" Height="130"
                        Source="{DynamicResource LogoPng}"
@@ -417,7 +426,7 @@
                                     
                                     Command="{Binding PausePlayCommand}"
                                     Click="PlaySongButton_Click" Cursor="Hand">
-                                
+
                                 <fa:IconImage Icon="{Binding IconPlayer}" 
                                               IconFont="Solid"
                                               Foreground="#5B2C6F"/>

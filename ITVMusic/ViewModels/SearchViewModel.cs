@@ -1,23 +1,13 @@
 ﻿using ITVMusic.Models;
-using ITVMusic.Repositories;
-using ITVMusic.Repositories.Bases;
-using ITVMusic.Util;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace ITVMusic.ViewModels {
     public class SearchViewModel : ViewModelBase {
 
-        private readonly IAlmacenRepository almacenRepository;
-        private readonly IPlaylistRepository playlistRepository;
-        private readonly IAlbumRepository albumRepository;
-
         private ObservableCollection<IMusicModelBase>? m_MusicItemsFound;
         private IMusicModelBase? m_SelectedMusicModel;
 
-        public ObservableCollection<IMusicModelBase> MusicItems { get; }
+        //public ObservableCollection<IMusicModelBase> MusicItems { get; }
         public ObservableCollection<IMusicModelBase>? MusicItemsFound {
             get => m_MusicItemsFound;
             set {
@@ -35,26 +25,88 @@ namespace ITVMusic.ViewModels {
         }
 
         public SearchViewModel() {
-            MusicItems = new();
 
-            almacenRepository = new AlmacenRepository();
-            playlistRepository = new PlaylistRepository();
-            albumRepository = new AlbumRepository();
+            //MusicItems = new();
 
             // FillMusicItemsTest();
-            FillMusicItems();
+            // FillMusicItems();
 
         }
-
+        /*
         private async void FillMusicItems() {
 
-            MusicItems.AddRange(await almacenRepository.GetByAll());
-            MusicItems.AddRange(await playlistRepository.GetByAll());
-            MusicItems.AddRange(await albumRepository.GetByAll());
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Start();
+
+            var almacenes = LoadAlmacenes();
+            var playlists = LoadPlaylists();
+            var albums = LoadAlbums();
+
+            await Task.WhenAll(almacenes, playlists, albums);
+
+            sw.Stop();
+            MessageBox.Show($"{sw.ElapsedMilliseconds} ms");
+            MusicItems.AddRange(almacenes.Result);
+            MusicItems.AddRange(playlists.Result);
+            MusicItems.AddRange(albums.Result);
 
             MessageBox.Show("Cargados");
         }
 
+        private static async Task<IEnumerable<AlmacenModel>> LoadAlmacenes() {
+
+            var almacenes = (await App.AlmacenRepository.GetByAllAsync()).ToList();
+
+            var songs = (from almacen in almacenes
+                         select App.SongRepository.GetFromAsync(almacen)).ToList();
+
+            var albums = (from almacen in almacenes
+                          select App.AlbumRepository.GetFromAsync(almacen)).ToList();
+
+            await Task.WhenAll(songs);
+
+            await Task.WhenAll(albums);
+
+            for (int i = 0; i < almacenes.Count; i++) {
+                almacenes[i].Song = songs[i].Result;
+                almacenes[i].Album = albums[i].Result;
+            }
+
+            return almacenes;
+        }
+
+        private static async Task<IEnumerable<PlaylistModel>> LoadPlaylists() {
+
+            var playlists = (await App.PlaylistRepository.GetByAllAsync()).ToList();
+
+            var items = (from playlist in playlists
+                         select App.AlmacenRepository.GetFromAsync(playlist)).ToList();
+
+            await Task.WhenAll(items);
+
+            for (int i = 0; i < playlists.Count; i++) {
+                playlists[i].Songs.AddRange(items[i].Result);
+            }
+
+            return playlists;
+        }
+
+        private static async Task<IEnumerable<AlbumModel>> LoadAlbums() {
+
+            var albums = (await App.AlbumRepository.GetByAllAsync()).ToList();
+
+            var items = (from album in albums
+                         select App.AlmacenRepository.GetFromAsync(album)).ToList();
+
+            await Task.WhenAll(items);
+
+            for (int i = 0; i < albums.Count; i++) {
+                albums[i].Songs.AddRange(items[i].Result);
+            }
+
+            return albums;
+        }
+        */
         private void FillMusicItemsTest() {
 
             //var songs = new ObservableCollection<SongModel>();

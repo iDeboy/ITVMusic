@@ -8,9 +8,19 @@ using System.Threading.Tasks;
 namespace ITVMusic.Repositories.Bases {
     public interface IAlmacenRepository : IRepository<AlmacenModel> {
 
-        public Task<uint> GetReproductions(AlmacenModel? almacen);
+        Task<IEnumerable<AlmacenModel>?> GetFromAsync(UserModel? user);
+        Task<IEnumerable<AlmacenModel>?> GetFromAsync(AlbumModel? album);
+        Task<IEnumerable<AlmacenModel>?> GetFromAsync(PlaylistModel? playlist);
+        Task<AlmacenModel?> GetFromAsync(SongModel? song, AlbumModel? album);
+        Task<uint> GetReproductionsAsync(AlmacenModel? almacen);
 
-        public Task<AlbumModel?> GetAlbum(AlmacenModel? almacen);
-        public Task<SongModel?> GetSong(AlmacenModel? almacen);
+        IEnumerable<AlmacenModel>? GetFrom(UserModel? user);
+        IEnumerable<AlmacenModel>? GetFrom(AlbumModel? album);
+        IEnumerable<AlmacenModel>? GetFrom(PlaylistModel? playlist);
+        AlmacenModel? GetFrom(SongModel? song, AlbumModel? album);
+        uint GetReproductions(AlmacenModel? almacen);
+
+
+
     }
 }

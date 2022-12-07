@@ -16,10 +16,10 @@ namespace ITVMusic.Models {
             Id = Convert.ToUInt32(reader["Almacena_Codigo"]);
             Date = Convert.ToDateTime(reader["Fecha"]);
 
-            Reproductions = reader["CantidadEscuchada"].ToUInt32();
+            // Reproductions = reader["CantidadEscuchada"].ToUInt32();
 
-            Song = new SongModel(reader);
-            Album = new AlbumModel(reader);
+            // Song = new SongModel(reader);
+            // Album = new AlbumModel(reader);
         }
 
         public uint Id { get; set; }
@@ -38,5 +38,7 @@ namespace ITVMusic.Models {
         public string? Description => $"{Song?.Description} - {Album?.Title}";
 
         public string? Information => Description;
+
+        public string Presentation => $"#{Id} {Title} - {Album?.Title} | {Song?.Duration}";
     }
 }
