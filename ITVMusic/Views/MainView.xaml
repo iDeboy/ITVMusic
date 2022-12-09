@@ -66,103 +66,124 @@
             <!-- Navegation menu -->
             <materialDesign:Card Grid.RowSpan="2"
                                  Background="{DynamicResource DashboardColor}"
+                                 
                                  materialDesign:ElevationAssist.Elevation="Dp8">
 
-                <StackPanel Margin="0,30,0,0">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
 
-                    <ProgressBar x:Name="m_ProgressBar" 
+                    <StackPanel Margin="0,30,0,0">
+
+                        <!--<ProgressBar x:Name="m_ProgressBar" 
                                  x:FieldModifier="private"
                                  Visibility="Collapsed"
                                  IsIndeterminate="True"
                                  Height="20"
                                  Background="Transparent"
-                                 Foreground="{DynamicResource CaptionColor}"/>
+                                 Foreground="{DynamicResource CaptionColor}"/>-->
 
-                    <Image Width="130" Height="130"
+                        <Image Width="130" Height="130"
                        Source="{DynamicResource LogoPng}"
                        Margin="0,10,0,10"/>
 
-                    <RadioButton Command="{Binding HomeCommand}" 
+                        <RadioButton Command="{Binding HomeCommand}" 
                                  IsChecked="True"
                                  Style="{DynamicResource MenuButton}">
 
-                        <StackPanel Orientation="Horizontal">
-                            <fa:IconImage Icon="Home" 
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="Home" 
                                           Style="{DynamicResource MenuButtonIcon}"/>
 
-                            <TextBlock Text="Inicio"/>
-                        </StackPanel>
+                                <TextBlock Text="Inicio"/>
+                            </StackPanel>
 
-                    </RadioButton>
+                        </RadioButton>
 
-                    <RadioButton Command="{Binding SearchCommand}"
+                        <RadioButton Command="{Binding SearchCommand}"
                                  Style="{DynamicResource MenuButton}">
 
-                        <StackPanel Orientation="Horizontal">
-                            <fa:IconImage Icon="Search" 
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="Search" 
                                           Style="{DynamicResource MenuButtonIcon}"/>
 
-                            <TextBlock Text="Buscar"/>
-                        </StackPanel>
+                                <TextBlock Text="Buscar"/>
+                            </StackPanel>
 
-                    </RadioButton>
+                        </RadioButton>
 
-                    <RadioButton Command="{Binding MyLibraryCommand}"
+                        <RadioButton Command="{Binding MyLibraryCommand}"
                                  Style="{DynamicResource MenuButton}"
                                  
                                  Visibility="Collapsed">
 
-                        <StackPanel Orientation="Horizontal">
-                            <fa:IconImage Icon="Book" 
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="Book" 
                                           Style="{DynamicResource MenuButtonIcon}"/>
 
-                            <TextBlock Text="Tu biblioteca"/>
-                        </StackPanel>
+                                <TextBlock Text="Tu biblioteca"/>
+                            </StackPanel>
 
-                    </RadioButton>
+                        </RadioButton>
 
-                    <Separator Background="Transparent" Height="50"/>
+                        <Separator Background="Transparent" Height="50"/>
 
-                    <RadioButton Command="{Binding CreatePlaylistCommand}"
+                        <RadioButton Command="{Binding CreatePlaylistCommand}"
                                  Style="{DynamicResource MenuButton}"
                                  Visibility="Visible">
 
-                        <StackPanel Orientation="Horizontal">
-                            <fa:IconImage Icon="PlusSquare" 
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="PlusSquare" 
                                           Style="{DynamicResource MenuButtonIcon}"/>
 
-                            <TextBlock Text="Crear playlist"/>
-                        </StackPanel>
+                                <TextBlock Text="Crear playlist"/>
+                            </StackPanel>
 
-                    </RadioButton>
+                        </RadioButton>
 
-                    <RadioButton Command="{Binding ShowSongsCommand}"
+                        <RadioButton Command="{Binding EditPlaylistCommand}"
+                                 Style="{DynamicResource MenuButton}"
+                                 Visibility="Visible">
+
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="FileEdit" 
+                                          Style="{DynamicResource MenuButtonIcon}"/>
+
+                                <TextBlock Text="Editar playlist"/>
+                            </StackPanel>
+
+                        </RadioButton>
+
+
+
+                        <RadioButton Command="{Binding ShowSongsCommand}"
                                  Style="{DynamicResource MenuButton}"
                                  Visibility="Collapsed">
 
-                        <StackPanel Orientation="Horizontal">
-                            <fa:IconImage Icon="Heart" 
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="Heart" 
                                           Style="{DynamicResource MenuButtonIcon}"/>
 
-                            <TextBlock Text="Tus me gusta"/>
-                        </StackPanel>
+                                <TextBlock Text="Tus me gusta"/>
+                            </StackPanel>
 
-                    </RadioButton>
+                        </RadioButton>
 
-                    <RadioButton Command="{Binding ShowPlaylistsCommand}"
+                        <RadioButton Command="{Binding ShowPlaylistsCommand}"
                                  Style="{DynamicResource MenuButton}"
                                  Visibility="Collapsed">
 
-                        <StackPanel Orientation="Horizontal">
-                            <fa:IconImage Icon="Music" 
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="Music" 
                                           Style="{DynamicResource MenuButtonIcon}"/>
 
-                            <TextBlock Text="Tus playlists"/>
-                        </StackPanel>
+                                <TextBlock Text="Tus playlists"/>
+                            </StackPanel>
 
-                    </RadioButton>
+                        </RadioButton>
 
-                </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
 
             </materialDesign:Card>
 
@@ -407,13 +428,12 @@
                             <!--<MediaElement x:Name="m_MediaElement"
                                           x:FieldModifier="private"
                                           Volume="{Binding Volume}"
-                                          Visibility="Collapsed"
                                           LoadedBehavior="Manual"
-                                          UnloadedBehavior="Manual"
+                                          UnloadedBehavior="Close"
+                                          d:IsHidden="True"
                                           
-                                          Source=""
                                           MediaOpened="MediaElement_MediaOpened"
-                                          SourceUpdated="MediaElement_SourceUpdated"/>-->
+                                          MediaEnded="MediaElement_MediaEnded"/>-->
 
                             <Button x:Name="m_MediaButton"
                                     x:FieldModifier="private"

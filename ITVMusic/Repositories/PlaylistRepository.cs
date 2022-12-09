@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Media;
 
 namespace ITVMusic.Repositories {
     public class PlaylistRepository : RepositoryBase, IPlaylistRepository {
@@ -20,8 +19,6 @@ namespace ITVMusic.Repositories {
             connection.Open();
 
             using (var command = connection.CreateCommand()) {
-
-                command.Connection = connection;
 
                 command.CommandText = "Insert Into PlayList (Playlist_Titulo, Playlist_Icono)\n";
                 command.CommandText += "Values (@titulo, @icono);";
@@ -48,8 +45,6 @@ namespace ITVMusic.Repositories {
             await connection.OpenAsync();
 
             using (var command = connection.CreateCommand()) {
-
-                command.Connection = connection;
 
                 command.CommandText = "Insert Into PlayList (Playlist_Titulo, Playlist_Icono)\n";
                 command.CommandText += "Values (@titulo, @icono);";
@@ -147,7 +142,7 @@ namespace ITVMusic.Repositories {
 
             if (GetById(playlist.Id) is null) return false;
 
-            if (App.AlmacenRepository.GetByIdAsync(almacen.Id) is null) return false;
+            if (App.AlmacenRepository.GetById(almacen.Id) is null) return false;
 
             var almacenes = App.AlmacenRepository.GetFrom(playlist);
 
@@ -212,11 +207,60 @@ namespace ITVMusic.Repositories {
         }
 
         public bool Edit(PlaylistModel? playlist) {
-            throw new NotImplementedException();
+
+            if (playlist is null) return false;
+
+            var connection = GetConnection();
+
+            connection.Open();
+
+            using (var command = connection.CreateCommand()) {
+
+                command.CommandText = "Update PlayList\n";
+                command.CommandText += "Set Playlist_Titulo = @titulo,\n";
+                command.CommandText += "Playlist_Icono = @icono\n";
+                command.CommandText += "Where Playlist_Codigo = @id;";
+
+                command.Parameters.Add("@id", MySqlDbType.TinyText).Value = playlist.Id;
+                command.Parameters.Add("@titulo", MySqlDbType.TinyText).Value = playlist.Title;
+                command.Parameters.Add("@icono", MySqlDbType.MediumBlob).Value = playlist.Icon.ToByteArray();
+
+                command.ExecuteNonQuery();
+
+            }
+
+            connection.Close();
+
+            return true;
         }
 
-        public Task<bool> EditAsync(PlaylistModel? obj) {
-            throw new NotImplementedException();
+        public async Task<bool> EditAsync(PlaylistModel? playlist) {
+
+            if (playlist is null) return false;
+
+            var connection = GetConnection();
+
+            await connection.OpenAsync();
+
+            using (var command = connection.CreateCommand()) {
+
+                command.CommandText = "Update PlayList\n";
+                command.CommandText += "Set Playlist_Titulo = @titulo,\n";
+                command.CommandText += "Playlist_Icono = @icono\n";
+                command.CommandText += "Where Playlist_Codigo = @id;";
+
+                command.Parameters.Add("@id", MySqlDbType.TinyText).Value = playlist.Id;
+                command.Parameters.Add("@titulo", MySqlDbType.TinyText).Value = playlist.Title;
+                command.Parameters.Add("@icono", MySqlDbType.MediumBlob).Value = playlist.Icon.ToByteArray();
+
+                await command.ExecuteNonQueryAsync();
+
+            }
+
+            await connection.CloseAsync();
+
+            return true;
+
         }
 
         public IEnumerable<PlaylistModel> GetByAll() {
@@ -432,6 +476,78 @@ namespace ITVMusic.Repositories {
 
         public Task<bool> RemoveByIdAsync(object? id) {
             throw new NotImplementedException();
+        }
+
+        public bool UnattatchSong(AlmacenModel? almacen, PlaylistModel? playlist) {
+
+            if (playlist is null || almacen is null) return false;
+
+            // Revisar si existe la playlist y la cancion en la base de datos
+
+            if (GetById(playlist.Id) is null) return false;
+
+            if (App.AlmacenRepository.GetById(almacen.Id) is null) return false;
+
+            var almacenes = App.AlmacenRepository.GetFrom(playlist);
+
+            // Compobar que la cancion no este ya en la playlist
+            if (almacenes is not null && !almacenes.Any(a => a.Id == almacen.Id)) return false;
+
+            var connection = GetConnection();
+
+            connection.Open();
+
+            using (var command = connection.CreateCommand()) {
+
+                command.CommandText = "Delete From Agrega\n";
+                command.CommandText += "Where Playlist_Codigo = @playlistId And Almacena_Codigo = @almacenId;";
+
+                command.Parameters.Add("@playlistId", MySqlDbType.UInt32).Value = playlist.Id;
+                command.Parameters.Add("@almacenId", MySqlDbType.UInt32).Value = almacen.Id;
+
+                command.ExecuteNonQuery();
+            }
+
+            connection.Close();
+
+            return true;
+
+        }
+
+        public async Task<bool> UnattatchSongAsync(AlmacenModel? almacen, PlaylistModel? playlist) {
+
+            if (playlist is null || almacen is null) return false;
+
+            // Revisar si existe la playlist y la cancion en la base de datos
+
+            if ((await GetByIdAsync(playlist.Id)) is null) return false;
+
+            if ((await App.AlmacenRepository.GetByIdAsync(almacen.Id)) is null) return false;
+
+            var almacenes = await App.AlmacenRepository.GetFromAsync(playlist);
+
+            // Compobar que la cancion no este ya en la playlist
+            if (almacenes is not null && !almacenes.Any(a => a.Id == almacen.Id)) return false;
+
+            var connection = GetConnection();
+
+            await connection.OpenAsync();
+
+            using (var command = connection.CreateCommand()) {
+
+                command.CommandText = "Delete From Agrega\n";
+                command.CommandText += "Where Playlist_Codigo = @playlistId And Almacena_Codigo = @almacenId;";
+
+                command.Parameters.Add("@playlistId", MySqlDbType.UInt32).Value = playlist.Id;
+                command.Parameters.Add("@almacenId", MySqlDbType.UInt32).Value = almacen.Id;
+
+                await command.ExecuteNonQueryAsync();
+            }
+
+            await connection.CloseAsync();
+
+            return true;
+
         }
     }
 }

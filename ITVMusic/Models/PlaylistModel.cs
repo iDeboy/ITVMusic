@@ -34,6 +34,7 @@ namespace ITVMusic.Models {
         private string SongCountString => Songs.Count == 1 ? "canción" : "canciones";
         public string Information => $"De {string.Join(", ", AuthorsName)} - {Songs.Count} {SongCountString}, {SumSongsDuration()}";
         public string[] AuthorsName => GetAuthorsName();
+        public string Presentation => $"#{Id} {Title}";
         private string SumSongsDuration() {
 
             string result = "";
@@ -68,7 +69,7 @@ namespace ITVMusic.Models {
             if (Authors is null) return names.ToArray();
 
             names = new(from author in Authors
-                        select author.Name);
+                        select author.Nickname);
 
             return names.ToArray();
         }

@@ -77,10 +77,8 @@ namespace ITVMusic.CustomControls {
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e) {
 
-            if (sender is not TextBox txtBox) return;
+            if (sender is not TextBox) return;
 
-            Text = txtBox.Text;
-            
             OnTextChanged(e);
         }
 

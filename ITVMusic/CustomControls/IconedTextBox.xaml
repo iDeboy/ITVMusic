@@ -18,7 +18,7 @@
                  VerticalAlignment="Center"
                  MaxLength="{Binding MaxLenght, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:IconedTextBox}}"
                  CharacterCasing="{Binding CharacterCasing, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:IconedTextBox}}"
-                 
+                 Text="{Binding Text, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=local:IconedTextBox}}"
                  materialDesign:HintAssist.Foreground="{DynamicResource TextBoxTitleColor}"
                  materialDesign:HintAssist.Background="Transparent"
                  materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource TextBoxBorderColor}"

@@ -111,10 +111,19 @@ namespace ITVMusic.Views {
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e) {
+
             await App.InitMusicElements();
 
-            m_ProgressBar.Visibility = Visibility.Collapsed;
+            //m_ProgressBar.Visibility = Visibility.Collapsed;
         }
+
+        //private void MediaElement_MediaOpened(object sender, RoutedEventArgs e) {
+
+        //}
+
+        //private void MediaElement_MediaEnded(object sender, RoutedEventArgs e) {
+
+        //}
 
         /*private void MediaElement_SourceUpdated(object sender, System.Windows.Data.DataTransferEventArgs e) {
             m_MediaElement.Play();

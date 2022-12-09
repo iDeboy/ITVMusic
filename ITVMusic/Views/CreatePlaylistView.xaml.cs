@@ -21,5 +21,6 @@ namespace ITVMusic.Views {
         public CreatePlaylistView() {
             InitializeComponent();
         }
+
     }
 }

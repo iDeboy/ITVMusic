@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -68,6 +69,7 @@ namespace ITVMusic.ViewModels {
             get => m_Volume;
             set {
                 m_Volume = value;
+                m_MediaElement.Volume = value;
                 OnPropertyChanged();
             }
         }
@@ -107,6 +109,7 @@ namespace ITVMusic.ViewModels {
         public ICommand SearchCommand { get; }
         public ICommand MyLibraryCommand { get; }
         public ICommand CreatePlaylistCommand { get; }
+        public ICommand EditPlaylistCommand { get; }
         public ICommand ShowSongsCommand { get; }
         public ICommand ShowPlaylistsCommand { get; }
         public ICommand PausePlayCommand { get; }
@@ -129,6 +132,8 @@ namespace ITVMusic.ViewModels {
             SearchCommand = new ViewModelCommand(ExecuteSearchCommand);
             MyLibraryCommand = new ViewModelCommand(ExecuteMyLibraryCommand);
             CreatePlaylistCommand = new ViewModelCommand(ExecuteCreatePlaylistCommand);
+            EditPlaylistCommand = new ViewModelCommand(ExecuteEditPlaylistCommand);
+
             ShowSongsCommand = new ViewModelCommand(ExecuteShowSongsCommand);
             ShowPlaylistsCommand = new ViewModelCommand(ExecuteShowPlaylistsCommand);
             PausePlayCommand = new ViewModelCommand(ExecutePausePlayCommand);
@@ -137,6 +142,14 @@ namespace ITVMusic.ViewModels {
 
             //UserAccountTest();
             InitUserAccount();
+        }
+
+        private void ExecuteEditPlaylistCommand(object? obj) {
+
+            CurrentChildView = new EditPlaylistView();
+            Caption = "Editar playlist";
+            Icon = IconChar.FileEdit;
+
         }
 
         private void InitUserAccount() {

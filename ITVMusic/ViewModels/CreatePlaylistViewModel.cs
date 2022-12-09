@@ -115,7 +115,6 @@ namespace ITVMusic.ViewModels {
             PlaylistModel playlist = new() {
                 Icon = Icon,
                 Title = Title,
-
             };
 
             App.PlaylistRepository.Add(playlist);
@@ -123,16 +122,20 @@ namespace ITVMusic.ViewModels {
             playlist = App.PlaylistRepository.GetByAll().Last();
 
             App.PlaylistRepository.AttatchAuthor(App.UserData, playlist);
+            playlist.Authors.Add(App.UserData!);
 
             List<Task> tasks = new();
 
             foreach (var song in SelectedSongs) {
                 tasks.Add(App.PlaylistRepository.AttatchSongAsync(song, playlist));
+                playlist.Songs.Add(song);
             }
 
             await Task.WhenAll(tasks);
 
-            Clear();
+            await ClearAsync();
+
+            App.MusicItems.Add(playlist);
 
             MessageBox.Show("Playlist creada.");
         }
@@ -147,6 +150,11 @@ namespace ITVMusic.ViewModels {
                         select (AlmacenModel)it);
 
             SelectedSongs = new();
+        }
+
+        private Task ClearAsync() {
+            return Task.Run(Clear);
+
         }
     }
 }
